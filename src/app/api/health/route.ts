@@ -1,15 +1,15 @@
+// 1. IMPORTS
 import { db } from "@/lib/db/connection";
 import { NextResponse } from "next/server";
 
-//Health check endpoint
-//Vérifie que l'API et la DB sont opérationnelles
-
+// 2. FONCTION ASYNCHRONE GET
 export async function GET() {
+  // 3. ESSAYER de se connecter
   try {
-    //Faire la requête SQL
+    // 4. Requête SQL
     const result = await db.query("SELECT NOW() as server_time");
 
-    //Retourner le succès avec les données
+    // 5. Succès → Retourner 200 OK
     return NextResponse.json({
       status: "ok",
       timestamp: new Date().toISOString(),
@@ -18,9 +18,13 @@ export async function GET() {
         serverTime: result.rows[0].server_time,
       },
     });
+
+    // 6. Si ça échoue
   } catch (error) {
+    // 7. Logger l'erreur
     console.error("Health check failed:", error);
-    //Si erreur, return message d'erreur
+
+    // 8. Retourner 503 Service Unavailable
     return NextResponse.json(
       {
         status: "error",
@@ -30,7 +34,7 @@ export async function GET() {
           error: "Database connection failed",
         },
       },
-      { status: 503 }, //503 = Service Unavailable (indisponible)
+      { status: 503 },
     );
   }
 }
