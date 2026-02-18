@@ -1,24 +1,27 @@
 -- =============================================================================
--- CATEGORIES
+-- REFRESH_TOKENS
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS categories (
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    -- INFORMATIONS
-    name TEXT NOT NULL,
-    description TEXT,
-    color TEXT NOT NULL DEFAULT '#0066FF',
-    icon TEXT NOT NULL DEFAULT '📦',
+    -- RELATION
+    user_id UUID NOT NULL UNIQUE
+        REFERENCES users(id) ON DELETE CASCADE,
+
+    -- TOKEN
+    token_hash TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ,
 
     -- METADATA
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- =============================================================================
 -- INDEX
 -- =============================================================================
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_categories_name_unique
-    ON categories (LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires
+    ON refresh_tokens(expires_at);

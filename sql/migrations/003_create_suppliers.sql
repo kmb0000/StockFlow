@@ -1,30 +1,37 @@
 -- =============================================================================
--- SUPPLIERS (Fournisseurs)
+-- SUPPLIERS
 -- =============================================================================
-CREATE TABLE suppliers (
+
+CREATE TABLE IF NOT EXISTS suppliers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
+    -- INFORMATIONS GENERALES
     name TEXT NOT NULL,
-    --CONTACT
     email TEXT,
     phone TEXT,
     contact_person TEXT,
-    --ADRESSE
+
+    -- ADRESSE
     address TEXT,
     city TEXT,
     postal_code TEXT,
     country TEXT NOT NULL DEFAULT 'France',
+
+    -- COMPLEMENT
     website TEXT,
     notes TEXT,
-    --META DONNEES
+
+    -- STATUS
     is_active BOOLEAN NOT NULL DEFAULT true,
 
+    -- METADATA
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- =============================================================================
--- INDEX pour optimiser les recherches
+-- INDEX
 -- =============================================================================
-CREATE INDEX idx_suppliers_name ON suppliers(name);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_suppliers_name_unique
+    ON suppliers (LOWER(name));
