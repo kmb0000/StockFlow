@@ -1,7 +1,7 @@
-import { Pool } from "pg";
+import { Pool, QueryResultRow } from "pg";
 
 //Crée un Pool de connexions (réutilisables)
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false, //Nécessaire pour Neon
@@ -10,5 +10,7 @@ const pool = new Pool({
 
 //function helper pour exécuter des requêtes
 export const db = {
-  query: (text: string, params?: any[]) => pool.query(text, params),
+  query: <T extends QueryResultRow>(text: string, params?: unknown[]) =>
+    pool.query<T>(text, params),
+  getClient: () => pool.connect(),
 };
