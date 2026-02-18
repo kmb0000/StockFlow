@@ -1,5 +1,5 @@
-import * as productsService from "@/lib/products/products.service";
 import { NextResponse } from "next/server";
+import * as supplierService from "@/lib/suppliers/suppliers.service";
 import { handleApiError } from "@/lib/utils/handle-api-error";
 import { requireAuth, requireRole } from "@/lib/auth/require-auth";
 import { createActivityContext } from "@/lib/activity_logs/activity-context";
@@ -7,15 +7,18 @@ import { createActivityContext } from "@/lib/activity_logs/activity-context";
 export async function GET() {
   try {
     await requireAuth();
-    const products = await productsService.getAllProducts();
+    const suppliers = await supplierService.getAllSuppliers();
 
     return NextResponse.json({
       success: true,
-      data: products,
-      count: products.length,
+      data: suppliers,
+      count: suppliers.length,
     });
   } catch (error) {
-    return handleApiError(error, "Erreur lors de la récupération des produits");
+    return handleApiError(
+      error,
+      "Erreur lors de la récupération des founisseurs",
+    );
   }
 }
 
@@ -26,16 +29,17 @@ export async function POST(request: Request) {
     const context = await createActivityContext();
 
     const body = await request.json();
-    const product = await productsService.createProduct(body, context);
+
+    const supplier = await supplierService.createSupplier(body, context);
 
     return NextResponse.json(
       {
         success: true,
-        data: product,
+        data: supplier,
       },
       { status: 201 },
     );
   } catch (error) {
-    return handleApiError(error, "Erreur lors de la création du produit");
+    return handleApiError(error, "Erreur lors de la création du fournisseur");
   }
 }

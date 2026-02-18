@@ -1,5 +1,5 @@
-import * as productsService from "@/lib/products/products.service";
 import { NextResponse } from "next/server";
+import * as categoryService from "@/lib/categories/categories.service";
 import { handleApiError } from "@/lib/utils/handle-api-error";
 import { requireAuth, requireRole } from "@/lib/auth/require-auth";
 import { createActivityContext } from "@/lib/activity_logs/activity-context";
@@ -7,15 +7,17 @@ import { createActivityContext } from "@/lib/activity_logs/activity-context";
 export async function GET() {
   try {
     await requireAuth();
-    const products = await productsService.getAllProducts();
-
+    const categories = await categoryService.getAllCategories();
     return NextResponse.json({
       success: true,
-      data: products,
-      count: products.length,
+      data: categories,
+      count: categories.length,
     });
   } catch (error) {
-    return handleApiError(error, "Erreur lors de la récupération des produits");
+    return handleApiError(
+      error,
+      "Erreur lors de la récupération des catégories",
+    );
   }
 }
 
@@ -26,16 +28,16 @@ export async function POST(request: Request) {
     const context = await createActivityContext();
 
     const body = await request.json();
-    const product = await productsService.createProduct(body, context);
+    const category = await categoryService.createCategory(body, context);
 
     return NextResponse.json(
       {
         success: true,
-        data: product,
+        data: category,
       },
       { status: 201 },
     );
   } catch (error) {
-    return handleApiError(error, "Erreur lors de la création du produit");
+    return handleApiError(error, "Erreur lors de la création de la catégorie");
   }
 }
