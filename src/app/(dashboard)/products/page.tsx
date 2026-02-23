@@ -10,33 +10,29 @@ import { cn } from "@/utils/cn";
 import { ArrowDownToLine, CircleFadingPlus, Printer } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-function getStockColor(quantity: number): string {
-  if (quantity === 0) return "text-[#EF4444]";
-  if (quantity <= 20) return "text-[#F59E0B]";
-  return "text-[#10B981]";
-}
-
-function getStockStatus(quantity: number): {
-  label: string;
-  variant: "success" | "warning" | "danger";
-} {
-  if (quantity === 0) return { label: "Rupture", variant: "danger" };
-  if (quantity <= 20) return { label: "Stock bas", variant: "warning" };
-  return { label: "En stock", variant: "success" };
-}
+import { getStockColor, getStockStatus } from "@/utils/product-helpers";
+import Pagination from "@/components/ui/pagination";
 
 export default function Products() {
+  //state
   const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  //state filtre
+  //state pagination
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  //Variable pagination
+  const itemsPerPage = 8;
+
+  //state filtre TOP
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [stockFilter, setStockFilter] = useState("");
   const [supplierFilter, setSupplierFilter] = useState("");
 
+  //filtre des selects
   const categories = [
     ...new Set(products.map((p) => p.category_name).filter(Boolean)),
   ] as string[];
@@ -69,6 +65,14 @@ export default function Products() {
       if (stockFilter === "Rupture") return p.quantity === 0;
       return true;
     });
+
+  //Pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -105,7 +109,7 @@ export default function Products() {
             Gérez votre inventaire de produits
           </p>
         </div>
-
+        {/* Bouton ADD */}
         <div>
           <Link href="/products/new">
             <Button>
@@ -114,21 +118,27 @@ export default function Products() {
           </Link>
         </div>
       </div>
-      {/* CARD */}
+      {/* Barre de recherche*/}
       <div className="bg-(--bg-card) border border-(--border) rounded-xl p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-end">
           <div>
             <SearchBar
               placeholder="Nom, SKU, description..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
-
+          {/* Categorie filter */}
           <Select
             label="Catégorie"
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setCurrentPage(1);
+            }}
           >
             <option value="">Toutes</option>
             {categories.map((cat) => (
@@ -137,20 +147,30 @@ export default function Products() {
               </option>
             ))}
           </Select>
+
+          {/* Status filter */}
           <Select
             label="Status stock"
             value={stockFilter}
-            onChange={(e) => setStockFilter(e.target.value)}
+            onChange={(e) => {
+              setStockFilter(e.target.value);
+              setCurrentPage(1);
+            }}
           >
             <option value="">Tous</option>
             <option>En stock</option>
             <option>Stock bas</option>
             <option>Rupture</option>
           </Select>
+
+          {/* Suppliers filter */}
           <Select
             label={"Fournisseur"}
             value={supplierFilter}
-            onChange={(e) => setSupplierFilter(e.target.value)}
+            onChange={(e) => {
+              setSupplierFilter(e.target.value);
+              setCurrentPage(1);
+            }}
           >
             <option value="">Tous</option>
             {suppliers.map((supplier) => (
@@ -160,6 +180,7 @@ export default function Products() {
             ))}
           </Select>
 
+          {/* Button reset */}
           <Button
             className="hover:border-(--primary) hover:text-(--primary)"
             variant="secondary"
@@ -197,7 +218,7 @@ export default function Products() {
           </span>
         </div>
       </div>
-
+      {/* LISTE DES PRODUITS */}
       <div className="bg-(--bg-card) border border-(--border) rounded-xl">
         <div className="flex justify-between items-center px-6 py-6">
           <h3 className="text-xl font-bold">Liste des produits</h3>
@@ -216,22 +237,24 @@ export default function Products() {
             </button>
           </div>
         </div>
+
+        {/* CARD PRODUCTS */}
         <table className="w-full text-left">
-          <thead className="bg-(--border)  text-red-400 text-sm opacity-60 rounded-xl">
+          <thead className="bg-(--border)  text-red-400 text-sm opacity-60">
             <tr>
-              <th className="px-6 py-4">PRODUIT</th>
-              <th className="px-6 py-4">CATEGORIE</th>
-              <th className="px-6 py-4">PRIX</th>
-              <th className="px-6 py-4">STOCK</th>
-              <th className="px-6 py-4">STATUS</th>
-              <th className="px-6 py-4">ACTIONS</th>
+              <th className="px-6 py-4 w-[35%]">PRODUIT</th>
+              <th className="px-6 py-4 w-[15%]">CATEGORIE</th>
+              <th className="px-6 py-4 w-[12%]">PRIX</th>
+              <th className="px-6 py-4 w-[8%]">STOCK</th>
+              <th className="px-6 py-4 w-[12%]">STATUS</th>
+              <th className="px-6 py-4 w-[18%]">ACTIONS</th>
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product) => (
+            {paginatedProducts.map((product) => (
               <tr
                 key={product.id}
-                className="bg-(--bg-card) text-(--text-primary) hover:bg-(--border) text-sm rounded-xl"
+                className="bg-(--bg-card) text-(--text-primary) hover:bg-(--border) text-sm border-t border-(--border)"
               >
                 <td className="px-6 py-6">
                   <div>
@@ -272,6 +295,20 @@ export default function Products() {
             ))}
           </tbody>
         </table>
+
+        {/* FOOTER PAGINATION */}
+        <div className="flex justify-between items-center p-6 border-t border-(--border)">
+          <div className="text-sm opacity-60">
+            Affichage de {startIndex + 1} à{" "}
+            {Math.min(startIndex + itemsPerPage, filteredProducts.length)} sur{" "}
+            {filteredProducts.length} produits
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
     </div>
   );
