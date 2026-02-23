@@ -2,8 +2,6 @@
 
 /* Reset CSS */
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
@@ -28,4 +26,17 @@ body {
   background: var(--bg-dark);
   color: var(--text-primary);
   min-height: 100vh;
+}
+.bg-auth-gradient {
+  background:
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(0, 102, 255, 0.2) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(0, 102, 255, 0.15) 0%,
+      transparent 60%
+    );
 }

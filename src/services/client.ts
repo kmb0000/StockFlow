@@ -62,9 +62,9 @@ export async function request<T>(
     return undefined as T;
   }
 
-  //ici on fait une constante qui stock le resultat de la requete converti en json donc lisible pour javascript je dirai
+  //ici on fait une constante qui stock le resultat de la requete converti en json donc lisible pour javascript
   const json: ApiResponse<T> = await response.json();
 
-  //ici on return data as T qui veut dire que le resultat qu'on aura sera bien T ?
+  //ici on return data as T qui veut dire que le resultat qu'on aura sera bien T
   return json.data;
 }

@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { requireAuth } from "../auth/require-auth";
+import { AuthenticatedUser, requireAuth } from "../auth/require-auth";
 
 export interface ActivityContext {
   userId: string | null;
@@ -8,7 +8,13 @@ export interface ActivityContext {
 }
 
 export async function createActivityContext(): Promise<ActivityContext> {
-  const authUser = await requireAuth();
+  let authUser: AuthenticatedUser | null = null;
+
+  try {
+    authUser = await requireAuth();
+  } catch {
+    authUser = null;
+  }
   const headerStore = await headers();
 
   const ip =
@@ -17,7 +23,7 @@ export async function createActivityContext(): Promise<ActivityContext> {
   const userAgent = headerStore.get("user-agent") ?? null;
 
   return {
-    userId: authUser.id,
+    userId: authUser?.id ?? null,
     ipAddress: ip,
     userAgent,
   };
