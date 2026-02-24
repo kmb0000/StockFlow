@@ -2,8 +2,8 @@
 
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
 import { ApiError } from "@/services/api-error";
-import { login } from "@/services/auth.service";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -13,6 +13,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
+  const { login } = useAuth();
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();

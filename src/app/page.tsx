@@ -1,9 +1,5 @@
-// import { redirect } from "next/navigation";
-
-//export default function Home() {
-//  redirect("/login");
-// }
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <h1>Temporaire</h1>;
+  redirect("/login");
 }
