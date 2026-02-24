@@ -19,10 +19,7 @@ export default function Select({
   const selectId = id ?? generateId;
   return (
     <div className="flex flex-col gap-2">
-      <label
-        className="text-sm font-medium text-[#F9FAFB] opacity-50"
-        htmlFor={selectId}
-      >
+      <label className="text-sm font-medium text-[#F9FAFB]" htmlFor={selectId}>
         {label}
       </label>
       <select
