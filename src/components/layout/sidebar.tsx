@@ -10,11 +10,12 @@ import {
   ArrowLeftRight,
   Users,
   Settings,
+  LogOut,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Sidebar() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   return (
     <aside className="w-64 h-full flex flex-col bg-(--bg-card) border-r border-(--border)">
       {/* TOP — LOGO */}
@@ -78,8 +79,8 @@ export default function Sidebar() {
       </nav>
 
       {/* BOTTOM — USER */}
-      <div className="px-6 py-4 border-t border-(--border)">
-        <div className="flex items-center gap-3">
+      <div className="px-2 py-4 border-t border-(--border)">
+        <div className="flex items-center justify-around gap-3">
           {/* Avatar */}
           <div className="h-10 w-10 rounded-full bg-(--primary) flex items-center justify-center text-sm font-bold text-white">
             {user
@@ -100,6 +101,19 @@ export default function Sidebar() {
               </div>
             </div>
           )}
+          <div>
+            <button
+              className="cursor-pointer hover:animate-pulse"
+              title="déconnexion"
+              onClick={() => {
+                if (window.confirm("Voulez-vous vraiment vous déconnecter ?")) {
+                  logout();
+                }
+              }}
+            >
+              <LogOut color="red" />
+            </button>
+          </div>
         </div>
       </div>
     </aside>
