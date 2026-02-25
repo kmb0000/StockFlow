@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { verifyToken } from "./jwt";
 import { ValidationError } from "../errors/validation.error";
 import { UserRole } from "./auth.types";
+import { AuthError } from "../errors/auth.error";
 
 export interface AuthenticatedUser {
   id: string;
@@ -16,7 +17,7 @@ export async function requireAuth(): Promise<AuthenticatedUser> {
   const accessToken = cookieStore.get("access_token")?.value;
 
   if (!accessToken) {
-    throw new ValidationError("Non autorisé");
+    throw new AuthError("Non autorisé");
   }
 
   try {
@@ -27,7 +28,7 @@ export async function requireAuth(): Promise<AuthenticatedUser> {
       role: payload.role as UserRole,
     };
   } catch {
-    throw new ValidationError("Token invalide");
+    throw new AuthError("Token invalide");
   }
 }
 
