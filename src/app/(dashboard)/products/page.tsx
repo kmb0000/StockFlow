@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getStockColor, getStockStatus } from "@/utils/product-helpers";
 import Pagination from "@/components/ui/pagination";
+import { exportProductsToCSV } from "@/utils/export-csv";
 
 export default function Products() {
   //state
@@ -224,6 +225,9 @@ export default function Products() {
           <h3 className="text-xl font-bold">Liste des produits</h3>
           <div className="flex gap-5">
             <button
+              onClick={() =>
+                exportProductsToCSV(filteredProducts, "stockflow-produits")
+              }
               title="Exporter"
               className="rounded-lg border border-(--border) hover:border-(--primary) transition-all duration-200 opacity-70 hover:opacity-100 p-3 hover:text-(--primary)"
             >
@@ -231,6 +235,7 @@ export default function Products() {
             </button>
             <button
               title="Imprimer"
+              onClick={() => window.print()}
               className="rounded-lg border border-(--border) hover:border-(--primary) transition-all duration-200 opacity-70 hover:opacity-100 p-3 hover:text-(--primary)"
             >
               <Printer className="w-5 h-5" />
@@ -251,48 +256,62 @@ export default function Products() {
             </tr>
           </thead>
           <tbody>
-            {paginatedProducts.map((product) => (
-              <tr
-                key={product.id}
-                className="bg-(--bg-card) text-(--text-primary) hover:bg-(--border) text-sm border-t border-(--border)"
-              >
-                <td className="px-6 py-6">
-                  <div>
-                    <div className="font-semibold">{product.name}</div>
-                    <div className="text-xs text-(--text-secondary) font-mono">
-                      {product.sku}
+            {paginatedProducts.map((product) => {
+              const color = product.category_color ?? "#0066FF";
+              return (
+                <tr
+                  key={product.id}
+                  className="bg-(--bg-card) text-(--text-primary) hover:bg-(--border) text-sm border-t border-(--border)"
+                >
+                  <td className="px-6 py-6">
+                    <div className="flex gap-4 items-center">
+                      <div
+                        className="w-12 h-12 flex items-center justify-center rounded-lg text-xl shrink-0"
+                        style={{
+                          backgroundColor: `${color}20`,
+                          border: `1px solid ${color}30`,
+                        }}
+                      >
+                        {product.category_icon ?? "📦"}
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <div className="font-black text-md">{product.name}</div>
+                        <div className="text-xs text-(--text-secondary) font-mono">
+                          {product.sku}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-6">{product.category_name}</td>
-                <td className="px-6 py-6">{product.selling_price} €</td>
-                <td className="px-6 py-6">
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      getStockColor(product.quantity),
-                    )}
-                  >
-                    {product.quantity}
-                  </span>
-                </td>
-                <td className="px-6 py-6">
-                  <Badge variant={getStockStatus(product.quantity).variant}>
-                    {getStockStatus(product.quantity).label}
-                  </Badge>
-                </td>
-                <td className="px-6 py-6">
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-md border border-gray-500 hover:border-(--primary) hover:text-(--primary) transition-all duration-200 px-2 py-1">
-                      <button className="cursor-pointer">Voir</button>
+                  </td>
+                  <td className="px-6 py-6">{product.category_name}</td>
+                  <td className="px-6 py-6">{product.selling_price} €</td>
+                  <td className="px-6 py-6">
+                    <span
+                      className={cn(
+                        "font-semibold",
+                        getStockColor(product.quantity),
+                      )}
+                    >
+                      {product.quantity}
+                    </span>
+                  </td>
+                  <td className="px-6 py-6">
+                    <Badge variant={getStockStatus(product.quantity).variant}>
+                      {getStockStatus(product.quantity).label}
+                    </Badge>
+                  </td>
+                  <td className="px-6 py-6">
+                    <div className="flex items-center gap-4">
+                      <div className="rounded-md border border-gray-500 hover:border-(--primary) hover:text-(--primary) transition-all duration-200 px-2 py-1">
+                        <button className="cursor-pointer">Voir</button>
+                      </div>
+                      <div className="rounded-md border border-gray-500 hover:border-(--primary) hover:text-(--primary) transition-all duration-200 px-2 py-1">
+                        <button className="cursor-pointer">Modifier</button>
+                      </div>
                     </div>
-                    <div className="rounded-md border border-gray-500 hover:border-(--primary) hover:text-(--primary) transition-all duration-200 px-2 py-1">
-                      <button className="cursor-pointer">Modifier</button>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
