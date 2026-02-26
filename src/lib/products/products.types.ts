@@ -104,3 +104,18 @@ export interface ProductWithRelations {
   created_by_name: string | null;
   created_by_role: string | null;
 }
+
+export interface ProductDetail extends ProductWithRelations {
+  barcode: string | null;
+  tax_rate: string;
+  unit: string;
+  alert_threshold: number | null;
+  weight: string | null;
+  location: string | null;
+  tags: string[] | null;
+  images: string[] | null;
+  is_available: boolean;
+  supplier_email: string | null;
+  supplier_phone: string | null;
+  supplier_contact: string | null;
+}

@@ -108,6 +108,26 @@ export async function getProductById(id: string) {
   }
 }
 
+export async function getProductDetailById(id: string) {
+  try {
+    const parsedId = z.uuid("ID invalide").parse(id);
+
+    const product = await productsRepository.findProductDetailById(parsedId);
+
+    if (!product) {
+      throw new NotFoundError("Produit non trouvé");
+    }
+
+    return product;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new ValidationError("ID invalide");
+    }
+
+    throw error;
+  }
+}
+
 /**
  * UPDATE PRODUCT
  */

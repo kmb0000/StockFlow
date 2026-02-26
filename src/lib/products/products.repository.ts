@@ -3,6 +3,7 @@ import { db, pool } from "../db/connection";
 import {
   CreateProductData,
   Product,
+  ProductDetail,
   ProductWithRelations,
   UpdateProductInput,
 } from "./products.types";
@@ -330,5 +331,64 @@ export async function getById(
     ...row,
     created_at: new Date(row.created_at),
     updated_at: new Date(row.updated_at),
+  };
+}
+
+export async function findProductDetailById(
+  id: string,
+): Promise<ProductDetail | null> {
+  const { rows } = await db.query<ProductDetail>(
+    `
+    SELECT
+      p.id,
+      p.sku,
+      p.name,
+      p.barcode,
+      p.tax_rate,
+      p.unit,
+      p.alert_threshold,
+      p.weight,
+      p.location,
+      p.tags,
+      p.images,
+      p.is_available,
+      p.description,
+      p.quantity,
+      p.selling_price,
+      p.purchase_price,
+      p.status,
+      p.created_at,
+
+      c.id    AS category_id,
+      c.name  AS category_name,
+      c.color AS category_color,
+      c.icon  AS category_icon,
+
+      s.id    AS supplier_id,
+      s.name  AS supplier_name,
+      s.email AS supplier_email,
+s.phone AS supplier_phone,
+s.contact_person AS supplier_contact,
+
+      u.id    AS created_by_id,
+      u.name  AS created_by_name,
+      u.role  AS created_by_role
+
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.id
+    LEFT JOIN suppliers  s ON p.supplier_id = s.id
+    LEFT JOIN users      u ON p.created_by = u.id
+    WHERE p.id = $1
+    LIMIT 1
+    `,
+    [id],
+  );
+
+  const row = rows[0];
+  if (!row) return null;
+
+  return {
+    ...row,
+    created_at: new Date(row.created_at),
   };
 }
