@@ -46,18 +46,24 @@ export default function Categories() {
         </div>
       </header>
       {/* SECTION STATS */}
-      <div className="bg-(--bg-card) border border-(--border) p-6 rounded-xl flex justify-around gap-6">
+      <div className="bg-(--bg-card) border border-(--border) p-6 rounded-xl flex justify-around text-center gap-6">
         <div className="flex flex-col gap-2">
-          <span>Total catégories</span>
-          <span>{categories.length}</span>
+          <span className="text-sm text-(--text-secondary)">
+            Total catégories
+          </span>
+          <span className="text-3xl">{categories.length}</span>
         </div>
-        <div className="flex flex-col">
-          <span>Produits catégorisés</span>
-          <span>-</span>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm text-(--text-secondary)">
+            Produits catégorisés
+          </span>
+          <span className="text-3xl text-(--success)">-</span>
         </div>
-        <div className="flex flex-col">
-          <span>Catégorie la plus grande</span>
-          <span>-</span>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm text-(--text-secondary)">
+            Catégorie la plus grande
+          </span>
+          <span className="text-3xl">-</span>
         </div>
       </div>
 

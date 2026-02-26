@@ -103,7 +103,7 @@ export default function Products() {
   return (
     <div className="p-4 sm:p-1 lg:p-2 space-y-8">
       {/* ================= HEADER ================= */}
-      <div className="p-5 flex justify-between items-center">
+      <div className="p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">Produits</h1>
           <p className="text-(--text-secondary)">
