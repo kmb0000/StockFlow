@@ -25,7 +25,7 @@ export default function Dashboard() {
     fetchProducts();
   }, []);
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8">
+    <div className="p-4 sm:p-1 lg:p-2 space-y-8">
       {/* ================= HEADER ================= */}
       <div className="p-5">
         <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>

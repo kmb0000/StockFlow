@@ -92,7 +92,7 @@ export default function AddProduct() {
   }
 
   return (
-    <div>
+    <div className="p-4 sm:p-1 lg:p-2 space-y-8">
       {/* HEADER */}
       <header className="flex flex-col gap-4 mb-5">
         <nav className="flex gap-2 opacity-50 text-sm">

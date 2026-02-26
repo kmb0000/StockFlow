@@ -99,7 +99,7 @@ export default function Products() {
   const outOfStock = products.filter((p) => p.quantity === 0).length;
 
   if (loading) return <p>Chargement...</p>;
-  if (error) return <p className="text-[#EF4444]">{error}</p>;
+  if (error) return <p className="text-(--error)">{error}</p>;
   return (
     <div className="p-4 sm:p-1 lg:p-2 space-y-8">
       {/* ================= HEADER ================= */}
@@ -302,7 +302,9 @@ export default function Products() {
                   <td className="px-6 py-6">
                     <div className="flex items-center gap-4">
                       <div className="rounded-md border border-gray-500 hover:border-(--primary) hover:text-(--primary) transition-all duration-200 px-2 py-1">
-                        <button className="cursor-pointer">Voir</button>
+                        <Link href={`/products/${product.id}`}>
+                          <button className="cursor-pointer">Voir</button>
+                        </Link>
                       </div>
                       <div className="rounded-md border border-gray-500 hover:border-(--primary) hover:text-(--primary) transition-all duration-200 px-2 py-1">
                         <button className="cursor-pointer">Modifier</button>
