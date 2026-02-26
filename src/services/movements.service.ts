@@ -1,11 +1,12 @@
 import {
   CreateStockMovementInput,
   StockMovement,
+  StockMovementWithRelations,
 } from "@/lib/stock_movements/stock_movements.types";
 import { request } from "./client";
 
-export async function getAll(): Promise<StockMovement[]> {
-  return request<StockMovement[]>("/api/stock_movements", {
+export async function getAll(): Promise<StockMovementWithRelations[]> {
+  return request<StockMovementWithRelations[]>("/api/stock_movements", {
     method: "GET",
   });
 }
