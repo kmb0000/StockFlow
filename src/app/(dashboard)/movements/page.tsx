@@ -18,6 +18,37 @@ export default function StockMovements() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  //states input
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [userFilter, setUserFilter] = useState("");
+
+  const userNames = [...new Set(movements.map((m) => m.created_by_name))];
+
+  const filteredMovements = movements
+    .filter((m) => {
+      if (!search) return true;
+      const s = search.toLowerCase();
+      return (
+        m.product_name.toLowerCase().includes(s) ||
+        m.product_sku.toLowerCase().includes(s) ||
+        m.reason.toLowerCase().includes(s)
+      );
+    })
+    .filter((m) => {
+      if (!typeFilter) return true;
+      return m.type === typeFilter;
+    })
+    .filter((m) => {
+      if (!statusFilter) return true;
+      return m.status === statusFilter;
+    })
+    .filter((m) => {
+      if (!userFilter) return true;
+      return m.created_by_name === userFilter;
+    });
+
   useEffect(() => {
     const fetchMovements = async () => {
       try {
@@ -43,11 +74,11 @@ export default function StockMovements() {
   const itemsPerPage = 10;
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedMovements = movements.slice(
+  const paginatedMovements = filteredMovements.slice(
     startIndex,
     startIndex + itemsPerPage,
   );
-  const totalPages = Math.ceil(totalMovements / itemsPerPage);
+  const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
 
   if (loading) return <p>Chargement...</p>;
   if (error) return <p className="text-(--error)">{error}</p>;
@@ -86,12 +117,63 @@ export default function StockMovements() {
 
       <div className="bg-(--bg-card) border border-(--border) p-4 rounded-xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-end">
-          <SearchBar placeholder="Produit, référence, raison..." />
-          <Select label={"Type"}></Select>
-          <Select label={"Période"}></Select>
-          <Select label={"Utilisateur"}></Select>
+          <SearchBar
+            placeholder="Produit, référence, raison..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          <Select
+            label={"Type"}
+            value={typeFilter}
+            onChange={(e) => {
+              setTypeFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            {" "}
+            <option value="">Tous</option>
+            <option value="IN">Entrée</option>
+            <option value="OUT">Sortie</option>
+          </Select>
+          <Select
+            label={"Statut"}
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Tous</option>
+            <option value="PENDING">En attente</option>
+            <option value="VALIDATED">Validé</option>
+            <option value="REJECTED">Rejeté</option>
+          </Select>
+          <Select
+            label={"Utilisateur"}
+            value={userFilter}
+            onChange={(e) => {
+              setUserFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Tous</option>
+            {userNames.map((userName) => (
+              <option key={userName} value={userName}>
+                {userName}
+              </option>
+            ))}
+          </Select>
           {/* Button reset */}
           <Button
+            onClick={() => {
+              setSearch("");
+              setTypeFilter("");
+              setStatusFilter("");
+              setUserFilter("");
+            }}
             className="hover:border-(--primary) hover:text-(--primary)"
             variant="secondary"
           >
@@ -244,7 +326,7 @@ export default function StockMovements() {
         <div className="flex justify-between items-center p-6 border-t border-(--border)">
           <div className="text-sm opacity-60">
             Affichage de {startIndex + 1} à{" "}
-            {Math.min(startIndex + itemsPerPage, totalMovements)} sur{" "}
+            {Math.min(startIndex + itemsPerPage, filteredMovements.length)} sur{" "}
             {totalMovements} mouvements
           </div>
           <Pagination
