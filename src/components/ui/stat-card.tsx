@@ -3,7 +3,7 @@ import { LucideIcon } from "lucide-react";
 
 type StatCardProps = {
   label: string;
-  value: string;
+  value: string | number;
   Icon: LucideIcon;
   variant: "blue" | "green" | "yellow" | "red";
   change: string;
