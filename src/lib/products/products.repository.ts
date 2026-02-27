@@ -57,30 +57,22 @@ export async function findAllProducts(): Promise<ProductWithRelations[]> {
  * Insertion sécurisée avec requête paramétrée
  */
 export async function createProduct(data: CreateProductData): Promise<Product> {
-  const {
-    sku,
-    name,
-    description,
-    quantity,
-    selling_price,
-    purchase_price,
-    category_id,
-    supplier_id,
-  } = data;
+  const columns: string[] = [];
+  const placeholders: string[] = [];
+  const values: unknown[] = [];
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined) {
+      columns.push(key);
+      placeholders.push(`$${values.length + 1}`);
+      values.push(value);
+    }
+  });
 
   const { rows } = await db.query<Product>(
     `
-    INSERT INTO products (
-      sku,
-      name,
-      description,
-      quantity,
-      selling_price,
-      purchase_price,
-      category_id,
-      supplier_id
-    )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+    INSERT INTO products (${columns.join(", ")})
+    VALUES (${placeholders.join(", ")})
     RETURNING
       id,
       sku,
@@ -108,16 +100,7 @@ export async function createProduct(data: CreateProductData): Promise<Product> {
       created_at,
       updated_at
     `,
-    [
-      sku,
-      name,
-      description ?? null,
-      quantity,
-      selling_price,
-      purchase_price,
-      category_id ?? null,
-      supplier_id ?? null,
-    ],
+    values,
   );
 
   const row = rows[0];
@@ -367,8 +350,8 @@ export async function findProductDetailById(
       s.id    AS supplier_id,
       s.name  AS supplier_name,
       s.email AS supplier_email,
-s.phone AS supplier_phone,
-s.contact_person AS supplier_contact,
+      s.phone AS supplier_phone,
+      s.contact_person AS supplier_contact,
 
       u.id    AS created_by_id,
       u.name  AS created_by_name,

@@ -20,28 +20,12 @@ export async function createProduct(data: unknown, context: ActivityContext) {
   try {
     const parsedData = createProductSchema.parse(data);
 
-    const {
-      name,
-      description,
-      quantity,
-      selling_price,
-      purchase_price,
-      category_id,
-      supplier_id,
-    } = parsedData;
-
     const sku = `PROD-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
 
     try {
       const product = await productsRepository.createProduct({
         sku,
-        name,
-        description,
-        quantity,
-        selling_price,
-        purchase_price,
-        category_id,
-        supplier_id,
+        ...parsedData,
       });
 
       // Log uniquement après succès
