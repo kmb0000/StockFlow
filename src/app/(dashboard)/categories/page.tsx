@@ -71,7 +71,7 @@ export default function Categories() {
           <p className="opacity-50">Gérez les catégories de votre inventaire</p>
         </div>
         <div>
-          <Link href={`/products/new`}>
+          <Link href={`/categories/new`}>
             <Button>
               <CircleFadingPlus className="w-5 h-5" />
               Nouvelle catégorie
@@ -136,7 +136,7 @@ export default function Categories() {
                   {categorie.icon}
                 </div>
                 <div className="flex gap-3 justify-center">
-                  <Link href="#">
+                  <Link href={`/categories/${categorie.id}/edit`}>
                     <button
                       title="Modifier"
                       className="bg-transparent border border-(--border) p-2 text-sm hover:border-(--primary) transition-all duration-200 rounded-lg"
