@@ -2,16 +2,20 @@
 
 import Button from "@/components/ui/button";
 import { Category } from "@/lib/categories/categories.types";
+import { ProductWithRelations } from "@/lib/products/products.types";
 import { getAll } from "@/services/categories.service";
+import { getAll as getAllProducts } from "@/services/products.service";
 import { CircleFadingPlus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Categories() {
+  //state globals
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-
+  const [products, setProducts] = useState<ProductWithRelations[]>([]);
+  //useEffect pour categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -25,6 +29,36 @@ export default function Categories() {
     };
     fetchCategories();
   }, []);
+
+  //useEffect pour products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getAllProducts();
+        setProducts(data);
+      } catch {
+        setError("Erreur lors de la récupération des produits");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const categorizedProducts = products.filter((p) => p.category_id).length;
+
+  const result = categories.reduce(
+    (acc, categorie) => {
+      const count = products.filter(
+        (p) => p.category_id === categorie.id,
+      ).length;
+
+      return count > acc.count ? { name: categorie.name, count } : acc;
+    },
+    { name: null as string | null, count: 0 },
+  );
+
+  const categorieWinner = result.name;
 
   if (loading) return <p>Chargement...</p>;
   if (error) return <p className="text-(--error)">{error}</p>;
@@ -51,31 +85,45 @@ export default function Categories() {
           <span className="text-sm text-(--text-secondary)">
             Total catégories
           </span>
-          <span className="text-3xl">{categories.length}</span>
+          <span className="text-3xl font-black">{categories.length}</span>
         </div>
         <div className="flex flex-col gap-2">
           <span className="text-sm text-(--text-secondary)">
             Produits catégorisés
           </span>
-          <span className="text-3xl text-(--success)">-</span>
+          <span className="text-3xl text-(--success) font-black">
+            {categorizedProducts}
+          </span>
         </div>
         <div className="flex flex-col gap-2">
           <span className="text-sm text-(--text-secondary)">
             Catégorie la plus grande
           </span>
-          <span className="text-3xl">-</span>
+          <span className="text-3xl text-(--primary) font-black">
+            {categorieWinner ?? "-"}
+          </span>
         </div>
       </div>
 
       {/* SECTION CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {categories.map((categorie) => {
           const color = categorie.color ?? "#0066FF";
+          const productPerCategorie = products.filter(
+            (p) => p.category_id === categorie.id,
+          );
+          const valueStock = productPerCategorie.reduce((acc, product) => {
+            return acc + product.quantity * Number(product.purchase_price);
+          }, 0);
+
+          const lowStock = productPerCategorie.filter(
+            (p) => p.quantity <= 20 && p.quantity > 0,
+          ).length;
 
           return (
             <div
               key={categorie.id}
-              className="bg-(--bg-card) border border-(--border) rounded-xl p-5 transition-all duration-200 hover:-translate-y-2 hover:border-(--primary)"
+              className="bg-(--bg-card) border border-(--border) rounded-xl p-5 transition-all duration-200 hover:-translate-y-2 hover:border-(--primary) cursor-pointer"
             >
               <div className="flex justify-between items-start mb-5">
                 <div
@@ -110,19 +158,25 @@ export default function Categories() {
               </div>
               <div className="flex justify-between text-center gap-6 pt-4 border-t border-(--border)">
                 <div className="flex flex-col">
-                  <div>-</div>
+                  <div className="text-xl font-black">
+                    {productPerCategorie.length}
+                  </div>
                   <div className="text-(--text-secondary) text-sm">
                     Produits
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <div>-</div>
+                  <div className="text-xl font-black text-(--success)">
+                    {valueStock}€
+                  </div>
                   <div className="text-(--text-secondary) text-sm">
                     Valeur stock
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <div>-</div>
+                  <div className="text-xl font-black text-(--warning)">
+                    {lowStock}
+                  </div>
                   <div className="text-(--text-secondary) text-sm">
                     Stock bas
                   </div>
