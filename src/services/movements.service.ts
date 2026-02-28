@@ -28,12 +28,12 @@ export async function create(
 
 export async function validate(id: string): Promise<StockMovement> {
   return request<StockMovement>(`/api/stock_movements/${id}/validate`, {
-    method: "POST",
+    method: "PATCH",
   });
 }
 
 export async function reject(id: string): Promise<StockMovement> {
   return request<StockMovement>(`/api/stock_movements/${id}/reject`, {
-    method: "POST",
+    method: "PATCH",
   });
 }
