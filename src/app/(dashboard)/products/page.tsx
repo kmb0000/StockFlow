@@ -261,6 +261,9 @@ export default function Products() {
                 <th className="px-6 py-4 text-xs font-bold text-(--text-secondary) uppercase tracking-wider">
                   Catégorie
                 </th>
+                <th className="px-6 py-4 text-xs font-bold text-(--text-secondary) uppercase tracking-wider hidden lg:table-cell">
+                  Fournisseur
+                </th>
                 <th className="px-6 py-4 text-xs font-bold text-(--text-secondary) uppercase tracking-wider text-right">
                   Prix Vente
                 </th>
@@ -307,6 +310,11 @@ export default function Products() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-(--text-secondary)">
                         {product.category_name}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
+                      <span className="text-sm text-(--text-secondary)">
+                        {product.supplier_name ?? "—"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-sm">

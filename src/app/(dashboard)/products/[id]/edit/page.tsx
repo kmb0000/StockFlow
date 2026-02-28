@@ -251,6 +251,24 @@ export default function EditProduct({
                 ))}
               </Select>
             </section>
+
+            <section className="bg-(--bg-card) border border-(--border) rounded-xl p-6 space-y-6">
+              <h3 className="text-lg font-bold border-b border-(--border) pb-3">
+                Fournisseur
+              </h3>
+              <Select
+                label="Choisir"
+                value={form.supplier_id}
+                onChange={(e) => updateForm("supplier_id", e.target.value)}
+              >
+                <option value="">Aucun fournisseur</option>
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </Select>
+            </section>
           </div>
         </form>
       </div>
