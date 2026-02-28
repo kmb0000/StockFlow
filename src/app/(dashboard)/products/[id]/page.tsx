@@ -366,7 +366,7 @@ export default function DetailsProduct({ params }: ProductDetailPageProps) {
             <div className="grid grid-cols-1 gap-3">
               <button
                 onClick={() => setModalType("IN")}
-                className="flex items-center gap-4 p-4 rounded-xl border border-(--border) hover:border-(--success) hover:bg-(--success)/5 transition-all group text-left"
+                className="flex items-center gap-4 p-4 rounded-xl border border-(--border) hover:border-(--success) hover:bg-(--success)/5 transition-all group text-left cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-lg bg-(--success)/10 flex items-center justify-center text-(--success) group-hover:scale-110 transition-transform">
                   <Inbox className="w-6 h-6" />
@@ -379,7 +379,7 @@ export default function DetailsProduct({ params }: ProductDetailPageProps) {
 
               <button
                 onClick={() => setModalType("OUT")}
-                className="flex items-center gap-4 p-4 rounded-xl border border-(--border) hover:border-red-500 hover:bg-red-500/5 transition-all group text-left"
+                className="flex items-center gap-4 p-4 rounded-xl border border-(--border) hover:border-red-500 hover:bg-red-500/5 transition-all group text-left cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
                   <Inbox className="w-6 h-6 rotate-180" />

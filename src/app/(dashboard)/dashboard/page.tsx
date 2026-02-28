@@ -140,32 +140,24 @@ export default function Dashboard() {
           value={totalProducts}
           Icon={Package}
           variant="blue"
-          change="+12% mois"
-          changeType="positive"
         />
         <StatCard
           label="Valeur Stock"
           value={`${stockValue.toFixed(0)}€`}
           Icon={DollarSign}
           variant="green"
-          change="+8.2% mois"
-          changeType="positive"
         />
         <StatCard
           label="Stock Bas"
           value={lowStock}
           Icon={AlertTriangle}
           variant="yellow"
-          change="+5 semaine"
-          changeType="negative"
         />
         <StatCard
           label="Rupture"
           value={rupture}
           Icon={AlertCircle}
           variant="red"
-          change="+2 semaine"
-          changeType="negative"
         />
       </section>
 
