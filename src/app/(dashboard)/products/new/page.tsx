@@ -76,7 +76,6 @@ export default function AddProduct() {
     try {
       await create({
         name: form.name,
-        sku: form.sku,
         barcode: form.barcode,
         description: form.description,
         purchase_price:
@@ -98,7 +97,7 @@ export default function AddProduct() {
           .split(",")
           .map((t) => t.trim())
           .filter(Boolean),
-        status: form.status, // Maintenant TS est content car form.status est "ProductStatus"
+        status: form.status,
         is_available: form.is_available,
       });
       router.push("/products");
