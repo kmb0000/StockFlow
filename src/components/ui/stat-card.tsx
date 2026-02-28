@@ -6,8 +6,8 @@ type StatCardProps = {
   value: string | number;
   Icon: LucideIcon;
   variant: "blue" | "green" | "yellow" | "red";
-  change: string;
-  changeType: "positive" | "negative";
+  change?: string;
+  changeType?: "positive" | "negative";
   className?: string;
 };
 
@@ -43,14 +43,16 @@ export default function StatCard({
 
       <div>
         <h4 className="text-2xl font-bold tracking-tight">{value}</h4>
-        <p
-          className={cn(
-            "text-xs font-medium mt-1",
-            changeType === "positive" ? "text-green-500" : "text-red-500",
-          )}
-        >
-          {change}
-        </p>
+        {change && (
+          <p
+            className={cn(
+              "text-xs font-medium mt-1",
+              changeType === "positive" ? "text-green-500" : "text-red-500",
+            )}
+          >
+            {change}
+          </p>
+        )}
       </div>
     </div>
   );
