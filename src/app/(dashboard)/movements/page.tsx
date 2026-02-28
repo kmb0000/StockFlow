@@ -7,18 +7,25 @@ import SearchBar from "@/components/ui/search-input";
 import Select from "@/components/ui/select";
 
 import { StockMovementWithRelations } from "@/lib/stock_movements/stock_movements.types";
-import { getAll } from "@/services/movements.service";
+import { getAll, validate, reject } from "@/services/movements.service";
 import { getMovementStatus, getMovementType } from "@/utils/movement-helpers";
-import { ArrowDownToLine, Inbox, Printer } from "lucide-react";
+import {
+  ArrowDownToLine,
+  Printer,
+  PlusCircle,
+  MinusCircle,
+  History,
+  CheckCircle2,
+  XCircle,
+  User,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function StockMovements() {
-  //states globals
   const [movements, setMovements] = useState<StockMovementWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  //states input
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -36,43 +43,34 @@ export default function StockMovements() {
         m.reason.toLowerCase().includes(s)
       );
     })
-    .filter((m) => {
-      if (!typeFilter) return true;
-      return m.type === typeFilter;
-    })
-    .filter((m) => {
-      if (!statusFilter) return true;
-      return m.status === statusFilter;
-    })
-    .filter((m) => {
-      if (!userFilter) return true;
-      return m.created_by_name === userFilter;
-    });
+    .filter((m) => !typeFilter || m.type === typeFilter)
+    .filter((m) => !statusFilter || m.status === statusFilter)
+    .filter((m) => !userFilter || m.created_by_name === userFilter);
 
   useEffect(() => {
-    const fetchMovements = async () => {
-      try {
-        const data = await getAll();
-        setMovements(data);
-      } catch {
-        setError("Erreur lors de la récupération des mouvements");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchMovements();
   }, []);
 
-  //variables des stats
-  const totalMovements = movements.length;
-  const entriesThisMonth = movements.filter((m) => m.type === "IN").length;
-  const exitsThisMonth = movements.filter((m) => m.type === "OUT").length;
-  const pending = movements.filter((m) => m.status === "PENDING").length;
+  async function fetchMovements() {
+    try {
+      const data = await getAll();
+      setMovements(data);
+    } catch (err) {
+      setError("Erreur lors de la récupération des mouvements");
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  //states pagination
+  // Stats calculées
+  const totalMovements = movements.length;
+  const entriesCount = movements.filter((m) => m.type === "IN").length;
+  const exitsCount = movements.filter((m) => m.type === "OUT").length;
+  const pendingCount = movements.filter((m) => m.status === "PENDING").length;
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedMovements = filteredMovements.slice(
     startIndex,
@@ -80,255 +78,274 @@ export default function StockMovements() {
   );
   const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
 
-  if (loading) return <p>Chargement...</p>;
-  if (error) return <p className="text-(--error)">{error}</p>;
+  const handleAction = async (id: string, action: "validate" | "reject") => {
+    try {
+      if (action === "validate") await validate(id);
+      else await reject(id);
+      fetchMovements();
+    } catch (err) {
+      alert("L'action a échoué.");
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="p-10 text-center animate-pulse space-y-4">
+        <div className="h-12 w-1/3 bg-(--border) rounded-xl mx-auto" />
+        <div className="h-64 w-full bg-(--bg-card) rounded-2xl border border-(--border)" />
+      </div>
+    );
+
   return (
-    <div className="p-4 sm:p-1 lg:p-2 space-y-8">
-      <header className="flex justify-between items-center p-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-black">Mouvements de stock</h1>
-          <p className="text-sm text-(--text-secondary)">
-            Historique et gestion des entrées/sorties de stock
+    <div className="p-4 lg:p-8 max-w-7xl mx-auto space-y-8">
+      {/* HEADER */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black tracking-tight">Flux de Stock</h1>
+          <p className="text-(--text-secondary) flex items-center gap-2">
+            <History className="w-4 h-4" /> Historique complet des entrées et
+            sorties
           </p>
         </div>
-        <div className="flex gap-5">
-          <Button
-            className="px-6 py-3 rounded-xl font-semibold 
-            bg-linear-to-r from-green-500 to-green-900 
-            hover:from-green-900 hover:to-green-500 
-            transition-all duration-500 
-            shadow-lg hover:shadow-2xl 
-            hover:scale-105"
-          >
-            <Inbox color="green" /> Entrée de stock
+        <div className="flex gap-3 w-full md:w-auto">
+          <Button className="flex-1 md:flex-none bg-(--success) hover:opacity-90 border-none text-white shadow-lg shadow-green-500/20">
+            <PlusCircle className="w-4 h-4 mr-2" /> Entrée
           </Button>
-          <Button
-            className="px-6 py-3 rounded-xl font-semibold 
-            bg-linear-to-r from-red-500 to-red-900 
-            hover:from-red-900 hover:to-red-500 
-            transition-all duration-500 
-            shadow-lg hover:shadow-2xl 
-            hover:scale-105"
-          >
-            <Inbox color="red" /> Sortie de stock
+          <Button className="flex-1 md:flex-none bg-(--error) hover:opacity-90 border-none text-white shadow-lg shadow-red-500/20">
+            <MinusCircle className="w-4 h-4 mr-2" /> Sortie
           </Button>
         </div>
       </header>
 
-      <div className="bg-(--bg-card) border border-(--border) p-4 rounded-xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-end">
-          <SearchBar
-            placeholder="Produit, référence, raison..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
+      {/* FILTERS */}
+      <div className="bg-(--bg-card) border border-(--border) p-5 rounded-2xl shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+          <div className="lg:col-span-1">
+            <SearchBar
+              placeholder="Rechercher..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
           <Select
-            label={"Type"}
+            label="Type"
             value={typeFilter}
             onChange={(e) => {
               setTypeFilter(e.target.value);
               setCurrentPage(1);
             }}
           >
-            {" "}
-            <option value="">Tous</option>
-            <option value="IN">Entrée</option>
-            <option value="OUT">Sortie</option>
+            <option value="">Tous les types</option>
+            <option value="IN">Entrées (+)</option>
+            <option value="OUT">Sorties (-)</option>
           </Select>
           <Select
-            label={"Statut"}
+            label="Statut"
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
           >
-            <option value="">Tous</option>
+            <option value="">Tous les statuts</option>
             <option value="PENDING">En attente</option>
-            <option value="VALIDATED">Validé</option>
-            <option value="REJECTED">Rejeté</option>
+            <option value="VALIDATED">Validés</option>
+            <option value="REJECTED">Rejetés</option>
           </Select>
           <Select
-            label={"Utilisateur"}
+            label="Auteur"
             value={userFilter}
             onChange={(e) => {
               setUserFilter(e.target.value);
               setCurrentPage(1);
             }}
           >
-            <option value="">Tous</option>
-            {userNames.map((userName) => (
-              <option key={userName} value={userName}>
-                {userName}
+            <option value="">Tous les utilisateurs</option>
+            {userNames.map((u) => (
+              <option key={u} value={u}>
+                {u}
               </option>
             ))}
           </Select>
-          {/* Button reset */}
           <Button
+            variant="secondary"
             onClick={() => {
               setSearch("");
               setTypeFilter("");
               setStatusFilter("");
               setUserFilter("");
             }}
-            className="hover:border-(--primary) hover:text-(--primary)"
-            variant="secondary"
+            className="w-full"
           >
-            Rénitialiser
+            Reset
           </Button>
         </div>
       </div>
 
-      {/* SECTIONS STATS */}
-      <div className="bg-(--bg-card) border border-(--border) p-4 rounded-xl">
-        <div className="flex justify-around items-center text-center">
-          <div className="flex flex-col p-4 gap-3">
-            <span className="text-(--text-secondary) text-sm">
-              Total mouvements
-            </span>
-            <span className="text-3xl">{totalMovements}</span>
+      {/* QUICK STATS */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Total",
+            val: totalMovements,
+            color: "text-(--text-primary)",
+          },
+          { label: "Entrées", val: entriesCount, color: "text-(--success)" },
+          { label: "Sorties", val: exitsCount, color: "text-(--error)" },
+          { label: "En attente", val: pendingCount, color: "text-(--warning)" },
+        ].map((s, i) => (
+          <div
+            key={i}
+            className="bg-(--bg-card) border border-(--border) rounded-xl p-4 text-center"
+          >
+            <p className="text-[10px] uppercase font-bold tracking-widest opacity-50 mb-1">
+              {s.label}
+            </p>
+            <p className={`text-2xl font-black ${s.color}`}>{s.val}</p>
           </div>
-          <div className="flex flex-col p-4 gap-3">
-            <span className="text-(--text-secondary) text-sm">
-              Entrées ce mois
-            </span>
-            <span className="text-3xl text-(--success)">
-              {entriesThisMonth}
-            </span>
-          </div>
-          <div className="flex flex-col p-4 gap-3">
-            <span className="text-(--text-secondary) text-sm">
-              Sorties ce mois
-            </span>
-            <span className="text-3xl text-(--error)">{exitsThisMonth}</span>
-          </div>
-          <div className="flex flex-col p-4 gap-3">
-            <span className="text-(--text-secondary) text-sm">En attente</span>
-            <span className="text-3xl text-(--warning)">{pending}</span>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* SECTION HEADER LIST */}
-
-      <div className="bg-(--bg-card) border border-(--border) rounded-xl">
-        <div className="flex justify-between items-center p-5">
-          <h2 className="text-xl font-bold">Historique des mouvements</h2>
+      {/* TABLE */}
+      <div className="bg-(--bg-card) border border-(--border) rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-(--border) flex justify-between items-center bg-(--bg-card)">
+          <h2 className="text-lg font-bold">Mouvements récents</h2>
           <div className="flex gap-2">
-            <button
-              title="Exporter"
-              className="rounded-lg border border-(--border) hover:border-(--primary) transition-all duration-200 opacity-70 hover:opacity-100 p-3 hover:text-(--primary) cursor-pointer"
-            >
-              <ArrowDownToLine className="w-5 h-5" />
+            <button className="p-2 border border-(--border) rounded-lg hover:text-(--primary) hover:border-(--primary) transition-all">
+              <ArrowDownToLine className="w-4 h-4" />
             </button>
             <button
-              title="Imprimer"
               onClick={() => window.print()}
-              className="rounded-lg border border-(--border) hover:border-(--primary) transition-all duration-200 opacity-70 hover:opacity-100 p-3 hover:text-(--primary) cursor-pointer"
+              className="p-2 border border-(--border) rounded-lg hover:text-(--primary) hover:border-(--primary) transition-all"
             >
-              <Printer className="w-5 h-5" />
+              <Printer className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* SECTION LIST BODY */}
-        <table className="w-full border-collapse text-left">
-          <thead className="bg-[rgba(255,255,255,0.02)] border border-(--border)">
-            <tr className="text-(--text-secondary) text-sm">
-              <th className="px-6 py-4 w-[22%]">Produit</th>
-              <th className="px-6 py-4 w-[10%]">Type</th>
-              <th className="px-6 py-4 w-[8%]">Quantité</th>
-              <th className="px-6 py-4 w-[20%]">Raison</th>
-              <th className="px-6 py-4 w-[15%]">Créé par</th>
-              <th className="px-6 py-4 w-[10%]">Validation</th>
-              <th className="px-6 py-4 w-[15%]">Référence</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedMovements.map((movement) => {
-              const color = movement.product_category_color ?? "#0066FF";
-              return (
-                <tr
-                  key={movement.id}
-                  className="border-b border-(--border) hover:bg-(--border)"
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="text-2xl rounded-lg"
-                        style={{
-                          backgroundColor: `${color}20`,
-                          border: `1px solid ${color}30`,
-                        }}
-                      >
-                        {movement.product_category_icon ?? "📦"}
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="text-lg font-bold">
-                          {movement.product_name}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-250">
+            <thead>
+              <tr className="bg-(--bg-body)/50 text-(--text-secondary) text-xs uppercase tracking-tighter">
+                <th className="px-6 py-4 font-bold">Produit</th>
+                <th className="px-6 py-4 font-bold">Flux</th>
+                <th className="px-6 py-4 font-bold">Raison / Réf</th>
+                <th className="px-6 py-4 font-bold">Auteur / Date</th>
+                <th className="px-6 py-4 font-bold">Statut</th>
+                <th className="px-6 py-4 font-bold text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-(--border)">
+              {paginatedMovements.map((m) => {
+                const accent = m.product_category_color ?? "#0066FF";
+                return (
+                  <tr
+                    key={m.id}
+                    className="hover:bg-(--primary-alpha)/5 transition-colors group"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 flex items-center justify-center rounded-lg text-xl"
+                          style={{
+                            backgroundColor: `${accent}15`,
+                            border: `1px solid ${accent}30`,
+                          }}
+                        >
+                          {m.product_category_icon || "📦"}
                         </div>
-                        <div className="text-(--text-secondary) text-xs">
-                          {movement.product_sku}
+                        <div>
+                          <p className="font-bold leading-none mb-1 group-hover:text-(--primary) transition-colors">
+                            {m.product_name}
+                          </p>
+                          <p className="text-[10px] font-mono opacity-50 uppercase">
+                            {m.product_sku}
+                          </p>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge variant={getMovementType(movement.type).variant}>
-                      {getMovementType(movement.type).label}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={
-                        movement.type === "IN"
-                          ? "text-(--success) font-black"
-                          : "text-(--error) font-black"
-                      }
-                    >
-                      {movement.type === "IN" ? "+" : "-"}
-                      {movement.quantity}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm">{movement.reason}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <div className="text-sm">{movement.created_by_name}</div>
-                      <div className="text-xs text-(--text-secondary)">
-                        {new Date(movement.created_at).toLocaleDateString(
-                          "fr-FR",
-                        )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <Badge variant={getMovementType(m.type).variant}>
+                          {getMovementType(m.type).label}
+                        </Badge>
+                        <span
+                          className={`text-sm font-black ${m.type === "IN" ? "text-(--success)" : "text-(--error)"}`}
+                        >
+                          {m.type === "IN" ? "+" : "-"}
+                          {m.quantity}
+                        </span>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge variant={getMovementStatus(movement.status).variant}>
-                      {getMovementStatus(movement.status).label}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-(--text-secondary)">
-                      {movement.reference}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-medium">{m.reason}</p>
+                      <p className="text-[10px] opacity-40 font-mono">
+                        #{m.reference || "N/A"}
+                      </p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="w-6 h-6 rounded-full bg-(--border) flex items-center justify-center">
+                          <User className="w-3 h-3" />
+                        </div>
+                        <span>{m.created_by_name}</span>
+                      </div>
+                      <p className="text-[10px] opacity-50 mt-1">
+                        {new Date(m.created_at).toLocaleDateString("fr-FR")}
+                      </p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant={getMovementStatus(m.status).variant}>
+                        {getMovementStatus(m.status).label}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {m.status === "PENDING" ? (
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleAction(m.id, "validate")}
+                            className="p-2 rounded-lg bg-(--success)/10 text-(--success) hover:bg-(--success) hover:text-white transition-all shadow-sm"
+                            title="Valider"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleAction(m.id, "reject")}
+                            className="p-2 rounded-lg bg-(--error)/10 text-(--error) hover:bg-(--error) hover:text-white transition-all shadow-sm"
+                            title="Rejeter"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs italic opacity-30">
+                          Traitée
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
-        {/* FOOTER PAGINATION */}
-        <div className="flex justify-between items-center p-6 border-t border-(--border)">
-          <div className="text-sm opacity-60">
-            Affichage de {startIndex + 1} à{" "}
-            {Math.min(startIndex + itemsPerPage, filteredMovements.length)} sur{" "}
-            {totalMovements} mouvements
-          </div>
+        {/* PAGINATION */}
+        <div className="p-6 border-t border-(--border) flex flex-col sm:row justify-between items-center gap-4 bg-(--bg-card)">
+          <p className="text-xs text-(--text-secondary)">
+            Affichage de{" "}
+            <span className="font-bold text-(--text-primary)">
+              {startIndex + 1}
+            </span>{" "}
+            à{" "}
+            <span className="font-bold text-(--text-primary)">
+              {Math.min(startIndex + itemsPerPage, filteredMovements.length)}
+            </span>{" "}
+            sur {filteredMovements.length}
+          </p>
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

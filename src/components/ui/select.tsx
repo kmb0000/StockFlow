@@ -1,8 +1,9 @@
+"use client";
+
 import { cn } from "@/utils/cn";
 import { useId } from "react";
 
 type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
-  children?: React.ReactNode;
   label: string;
   error?: string;
 };
@@ -17,23 +18,30 @@ export default function Select({
 }: SelectProps) {
   const generateId = useId();
   const selectId = id ?? generateId;
+
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-[#F9FAFB]" htmlFor={selectId}>
+    <div className="flex flex-col gap-1.5 w-full">
+      <label
+        className="text-sm font-semibold text-(--text-primary) ml-1"
+        htmlFor={selectId}
+      >
         {label}
       </label>
       <select
+        id={selectId}
         className={cn(
-          "w-full px-4 py-3 bg-[#0A0E1A] border border-[#1F2937] rounded-lg text-[#F9FAFB] text-sm transition-all outline-none focus:border-[#0066FF] focus:shadow-[0_0_0_3px_rgba(0,102,255,0.1)] placeholder:text-[#9CA3AF] cursor-pointer",
-          error && "border-[#EF4444]",
+          "w-full px-4 py-2.5 bg-(--bg-dark) border border-(--border) rounded-lg text-(--text-primary) text-sm transition-all outline-none cursor-pointer appearance-none",
+          "focus:border-(--primary) focus:ring-2 focus:ring-(--primary)/10",
+          error && "border-red-500 focus:ring-red-500/10",
           className,
         )}
-        id={selectId}
         {...props}
       >
         {children}
       </select>
-      {error && <span className="text-sm text-[#EF4444]">{error}</span>}
+      {error && (
+        <span className="text-xs font-medium text-red-500 ml-1">{error}</span>
+      )}
     </div>
   );
 }

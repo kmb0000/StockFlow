@@ -9,9 +9,15 @@ type SidebarItemProps = {
   href: string;
   label: string;
   Icon: LucideIcon;
+  onClick?: () => void;
 };
 
-export default function SidebarItem({ href, label, Icon }: SidebarItemProps) {
+export default function SidebarItem({
+  href,
+  label,
+  Icon,
+  onClick,
+}: SidebarItemProps) {
   const pathName = usePathname();
   const isActive =
     href === "/dashboard"
@@ -27,6 +33,7 @@ export default function SidebarItem({ href, label, Icon }: SidebarItemProps) {
           : "text-(--text-secondary) hover:bg-white/5 hover:text-(--text-primary)",
       )}
       href={href}
+      onClick={onClick} // On déclenche le clic (qui fermera le menu sur mobile)
     >
       <Icon className="w-5 h-5" />
       <span>{label}</span>
