@@ -2,12 +2,16 @@
 
 import Badge from "@/components/ui/badge";
 import Button from "@/components/ui/button";
+import Input from "@/components/ui/input";
+import Modal from "@/components/ui/modal";
 import Pagination from "@/components/ui/pagination";
 import SearchBar from "@/components/ui/search-input";
 import Select from "@/components/ui/select";
 
 import { StockMovementWithRelations } from "@/lib/stock_movements/stock_movements.types";
-import { getAll, validate, reject } from "@/services/movements.service";
+import { ProductWithRelations } from "@/lib/products/products.types";
+import { getAll, validate, reject, create } from "@/services/movements.service";
+import { getAll as getAllProducts } from "@/services/products.service";
 import { getMovementStatus, getMovementType } from "@/utils/movement-helpers";
 import {
   ArrowDownToLine,
@@ -21,8 +25,163 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+// ============================================================
+// COMPOSANT FORMULAIRE MOUVEMENT
+// ============================================================
+
+type MovementFormProps = {
+  type: "IN" | "OUT";
+  products: ProductWithRelations[];
+  onSubmit: (data: {
+    product_id: string;
+    quantity: number;
+    reason: string;
+    reference?: string;
+    unit_price?: number;
+    notes?: string;
+  }) => Promise<void>;
+  onClose: () => void;
+  loading: boolean;
+  error: string;
+};
+
+function MovementForm({
+  type,
+  products,
+  onSubmit,
+  onClose,
+  loading,
+  error,
+}: MovementFormProps) {
+  const [productId, setProductId] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [reason, setReason] = useState("");
+  const [reference, setReference] = useState("");
+  const [unitPrice, setUnitPrice] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const activeProducts = products.filter((p) => p.status !== "archived");
+
+  const selectedProduct = activeProducts.find((p) => p.id === productId);
+
+  const handleSubmit = async () => {
+    await onSubmit({
+      product_id: productId,
+      quantity: parseInt(quantity),
+      reason,
+      reference: reference || undefined,
+      unit_price: unitPrice ? parseFloat(unitPrice) : undefined,
+      notes: notes || undefined,
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {error && (
+        <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400">
+          {error}
+        </div>
+      )}
+
+      {/* Sélection produit */}
+      <Select
+        label="Produit"
+        value={productId}
+        onChange={(e) => setProductId(e.target.value)}
+      >
+        <option value="">Sélectionner un produit...</option>
+        {activeProducts.map((p) => (
+          <option key={p.id} value={p.id}>
+            [{p.sku}] {p.name} — Stock : {p.quantity}
+          </option>
+        ))}
+      </Select>
+
+      {/* Info stock actuel si produit sélectionné */}
+      {selectedProduct && type === "OUT" && (
+        <div className="px-4 py-3 bg-(--primary)/5 border border-(--primary)/20 rounded-lg text-sm text-blue-400">
+          Stock actuel :{" "}
+          <span className="font-bold">{selectedProduct.quantity}</span> unités
+        </div>
+      )}
+
+      {/* Quantité */}
+      <Input
+        label="Quantité"
+        type="number"
+        min="1"
+        placeholder="Ex : 10"
+        value={quantity}
+        onChange={(e) => setQuantity(e.target.value)}
+      />
+
+      {/* Raison */}
+      <Input
+        label="Raison"
+        placeholder="Ex : Réapprovisionnement fournisseur"
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+      />
+
+      {/* Référence (optionnel) */}
+      <Input
+        label="Référence (optionnel)"
+        placeholder="Ex : BL-2024-001"
+        value={reference}
+        onChange={(e) => setReference(e.target.value)}
+      />
+
+      {/* Prix unitaire (optionnel) */}
+      <Input
+        label="Prix unitaire (optionnel)"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Ex : 12.50"
+        value={unitPrice}
+        onChange={(e) => setUnitPrice(e.target.value)}
+      />
+
+      {/* Notes (optionnel) */}
+      <Input
+        label="Notes (optionnel)"
+        placeholder="Informations complémentaires..."
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+      />
+
+      <div className="flex gap-3 pt-2">
+        <Button
+          variant="secondary"
+          className="flex-1"
+          onClick={onClose}
+          disabled={loading}
+        >
+          Annuler
+        </Button>
+        <Button
+          className={`flex-1 ${type === "IN" ? "bg-(--success) hover:opacity-90" : "bg-(--error) hover:opacity-90"}`}
+          onClick={handleSubmit}
+          disabled={loading || !productId || !quantity || !reason}
+        >
+          {loading
+            ? "Enregistrement..."
+            : type === "IN"
+              ? "Créer l'entrée"
+              : "Créer la sortie"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// PAGE PRINCIPALE
+// ============================================================
+
 export default function StockMovements() {
   const [movements, setMovements] = useState<StockMovementWithRelations[]>([]);
+  const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -30,6 +189,12 @@ export default function StockMovements() {
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [userFilter, setUserFilter] = useState("");
+
+  // State modals
+  const [modalIn, setModalIn] = useState(false);
+  const [modalOut, setModalOut] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const userNames = [...new Set(movements.map((m) => m.created_by_name))];
 
@@ -48,8 +213,24 @@ export default function StockMovements() {
     .filter((m) => !userFilter || m.created_by_name === userFilter);
 
   useEffect(() => {
-    fetchMovements();
+    fetchData();
   }, []);
+
+  async function fetchData() {
+    try {
+      const [movementsData, productsData] = await Promise.all([
+        getAll(),
+        getAllProducts(),
+      ]);
+      setMovements(movementsData);
+      setProducts(productsData);
+    } catch (err) {
+      console.error(`[StockMovements] Erreur fetch :`, err);
+      setError("Erreur lors de la récupération des données");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function fetchMovements() {
     try {
@@ -57,9 +238,6 @@ export default function StockMovements() {
       setMovements(data);
     } catch (err) {
       console.error(`[StockMovements] Erreur fetch getAll :`, err);
-      setError("Erreur lors de la récupération des mouvements");
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -79,6 +257,32 @@ export default function StockMovements() {
   );
   const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
 
+  async function handleMovement(
+    type: "IN" | "OUT",
+    data: {
+      product_id: string;
+      quantity: number;
+      reason: string;
+      reference?: string;
+      unit_price?: number;
+      notes?: string;
+    },
+  ) {
+    try {
+      setFormLoading(true);
+      setFormError("");
+      await create({ ...data, type });
+      await fetchMovements();
+      type === "IN" ? setModalIn(false) : setModalOut(false);
+    } catch (err: unknown) {
+      setFormError(
+        err instanceof Error ? err.message : "Erreur lors de la création",
+      );
+    } finally {
+      setFormLoading(false);
+    }
+  }
+
   const handleAction = async (id: string, action: "validate" | "reject") => {
     try {
       if (action === "validate") await validate(id);
@@ -86,7 +290,7 @@ export default function StockMovements() {
       fetchMovements();
     } catch (err) {
       console.error(`[StockMovements] Erreur pendant l'action :`, err);
-      alert("L'action a échoué.");
+      alert("L'action a échoué vous ne pouvez pas avoir un stock négatif.");
     }
   };
 
@@ -110,10 +314,22 @@ export default function StockMovements() {
           </p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
-          <Button className="flex-1 md:flex-none bg-(--success) hover:opacity-90 border-none text-white shadow-lg shadow-green-500/20">
+          <Button
+            className="flex-1 md:flex-none bg-(--success) hover:opacity-90 border-none text-white shadow-lg shadow-green-500/20"
+            onClick={() => {
+              setFormError("");
+              setModalIn(true);
+            }}
+          >
             <PlusCircle className="w-4 h-4 mr-2" /> Entrée
           </Button>
-          <Button className="flex-1 md:flex-none bg-(--error) hover:opacity-90 border-none text-white shadow-lg shadow-red-500/20">
+          <Button
+            className="flex-1 md:flex-none bg-(--error) hover:opacity-90 border-none text-white shadow-lg shadow-red-500/20"
+            onClick={() => {
+              setFormError("");
+              setModalOut(true);
+            }}
+          >
             <MinusCircle className="w-4 h-4 mr-2" /> Sortie
           </Button>
         </div>
@@ -355,6 +571,38 @@ export default function StockMovements() {
           />
         </div>
       </div>
+
+      {/* MODAL ENTRÉE */}
+      <Modal
+        isOpen={modalIn}
+        onClose={() => setModalIn(false)}
+        title="Nouvelle entrée de stock"
+      >
+        <MovementForm
+          type="IN"
+          products={products}
+          onSubmit={(data) => handleMovement("IN", data)}
+          onClose={() => setModalIn(false)}
+          loading={formLoading}
+          error={formError}
+        />
+      </Modal>
+
+      {/* MODAL SORTIE */}
+      <Modal
+        isOpen={modalOut}
+        onClose={() => setModalOut(false)}
+        title="Nouvelle sortie de stock"
+      >
+        <MovementForm
+          type="OUT"
+          products={products}
+          onSubmit={(data) => handleMovement("OUT", data)}
+          onClose={() => setModalOut(false)}
+          loading={formLoading}
+          error={formError}
+        />
+      </Modal>
     </div>
   );
 }
