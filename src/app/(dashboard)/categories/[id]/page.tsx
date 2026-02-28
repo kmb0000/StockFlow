@@ -214,7 +214,10 @@ export default function CategoryDetail({
       <section className="bg-(--bg-card) border border-(--border) rounded-2xl overflow-hidden shadow-sm">
         <div className="p-6 border-b border-(--border) flex justify-between items-center bg-(--bg-card)">
           <h3 className="text-xl font-bold">Produits liés</h3>
-          <button className="p-2 hover:bg-(--bg-body) rounded-lg border border-(--border) transition-colors text-(--text-secondary) hover:text-(--primary)">
+          <button
+            className="p-2 hover:bg-(--bg-body) rounded-lg border border-(--border) transition-colors text-(--text-secondary) hover:text-(--primary) cursor-pointer"
+            title="Exporter"
+          >
             <ArrowDownToLine className="w-5 h-5" />
           </button>
         </div>
@@ -304,7 +307,10 @@ export default function CategoryDetail({
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link href={`/products/${product.id}`}>
-                          <button className="p-2 rounded-lg border border-(--border) hover:border-(--primary) hover:text-(--primary) transition-all">
+                          <button
+                            className="p-2 rounded-lg border border-(--border) hover:border-(--primary) hover:text-(--primary) transition-all cursor-pointer"
+                            title="Détail du produit"
+                          >
                             <ExternalLink className="w-4 h-4" />
                           </button>
                         </Link>

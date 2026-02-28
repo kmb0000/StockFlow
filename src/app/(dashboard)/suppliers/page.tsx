@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { exportSuppliersToCSV } from "@/utils/export-csv";
 
 export default function Suppliers() {
   const [loading, setLoading] = useState(true);
@@ -188,8 +189,9 @@ export default function Suppliers() {
         <div className="flex justify-between items-center p-6 border-b border-(--border)">
           <h2 className="text-xl font-bold">Annuaire Partenaires</h2>
           <button
-            title="Exporter CSV"
-            className="p-2 border border-(--border) rounded-lg hover:text-(--primary) hover:border-(--primary) transition-all"
+            title="Exporter"
+            onClick={() => exportSuppliersToCSV(filteredSuppliers)}
+            className="p-2 border border-(--border) rounded-lg hover:text-(--primary) hover:border-(--primary) transition-all cursor-pointer"
           >
             <ArrowDownToLine className="w-5 h-5" />
           </button>

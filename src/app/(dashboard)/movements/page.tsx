@@ -24,6 +24,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { exportMovementsToCSV } from "@/utils/export-csv";
 
 // ============================================================
 // COMPOSANT FORMULAIRE MOUVEMENT
@@ -432,12 +433,17 @@ export default function StockMovements() {
         <div className="p-6 border-b border-(--border) flex justify-between items-center bg-(--bg-card)">
           <h2 className="text-lg font-bold">Mouvements récents</h2>
           <div className="flex gap-2">
-            <button className="p-2 border border-(--border) rounded-lg hover:text-(--primary) hover:border-(--primary) transition-all">
+            <button
+              title="Exporter"
+              onClick={() => exportMovementsToCSV(filteredMovements)}
+              className="p-2 border border-(--border) rounded-lg hover:text-(--primary) hover:border-(--primary) transition-all cursor-pointer"
+            >
               <ArrowDownToLine className="w-4 h-4" />
             </button>
             <button
               onClick={() => window.print()}
-              className="p-2 border border-(--border) rounded-lg hover:text-(--primary) hover:border-(--primary) transition-all"
+              title="Imprimer"
+              className="p-2 border border-(--border) rounded-lg hover:text-(--primary) hover:border-(--primary) transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
             </button>
@@ -525,14 +531,14 @@ export default function StockMovements() {
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => handleAction(m.id, "validate")}
-                            className="p-2 rounded-lg bg-(--success)/10 text-(--success) hover:bg-(--success) hover:text-white transition-all shadow-sm"
+                            className="p-2 rounded-lg bg-(--success)/10 text-(--success) hover:bg-(--success) hover:text-white transition-all shadow-sm cursor-pointer"
                             title="Valider"
                           >
                             <CheckCircle2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleAction(m.id, "reject")}
-                            className="p-2 rounded-lg bg-(--error)/10 text-(--error) hover:bg-(--error) hover:text-white transition-all shadow-sm"
+                            className="p-2 rounded-lg bg-(--error)/10 text-(--error) hover:bg-(--error) hover:text-white transition-all shadow-sm cursor-pointer"
                             title="Rejeter"
                           >
                             <XCircle className="w-4 h-4" />
