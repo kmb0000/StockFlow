@@ -2,7 +2,7 @@
 
 Application de gestion de stock fullstack — développée avec Next.js, TypeScript et PostgreSQL.
 
-🔗 **Démo live** : [stockflow.vercel.app](https://stockflow.vercel.app)
+🔗 **Démo live** : [stock-flow-rho-smoky.vercel.app](https://stock-flow-rho-smoky.vercel.app)
 
 ```
 Email        : demo@stockflow.com
