@@ -44,7 +44,7 @@ export default function Pagination({
     <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-4">
       {/* BOUTON PRÉCÉDENT */}
       <button
-        className="flex items-center justify-center w-9 h-9 sm:w-auto sm:px-4 rounded-lg border border-(--border) text-sm font-medium transition-all hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-(--primary) hover:text-(--primary)"
+        className="flex items-center justify-center w-9 h-9 sm:w-auto sm:px-4 rounded-lg border border-(--border) text-sm font-medium transition-all hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-(--primary) hover:text-(--primary) cursor-pointer"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
         title="Page précédente"
@@ -82,7 +82,7 @@ export default function Pagination({
 
       {/* BOUTON SUIVANT */}
       <button
-        className="flex items-center justify-center w-9 h-9 sm:w-auto sm:px-4 rounded-lg border border-(--border) text-sm font-medium transition-all hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-(--primary) hover:text-(--primary)"
+        className="flex items-center justify-center w-9 h-9 sm:w-auto sm:px-4 rounded-lg border border-(--border) text-sm font-medium transition-all hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed hover:border-(--primary) hover:text-(--primary) cursor-pointer"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
         title="Page suivante"

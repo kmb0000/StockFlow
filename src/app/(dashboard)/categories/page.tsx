@@ -159,11 +159,17 @@ export default function Categories() {
                 </div>
                 <div className="flex gap-2">
                   <Link href={`/categories/${cat.id}/edit`}>
-                    <button className="p-2 rounded-lg border border-(--border) hover:bg-(--bg-body) text-(--text-secondary) hover:text-(--primary) transition-colors">
+                    <button
+                      className="p-2 rounded-lg border border-(--border) hover:bg-(--bg-body) text-(--text-secondary) hover:text-(--primary) transition-colors cursor-pointer"
+                      title="Modifier"
+                    >
                       <Pencil className="w-4 h-4" />
                     </button>
                   </Link>
-                  <button className="p-2 rounded-lg border border-(--border) hover:bg-(--bg-body) text-(--text-secondary) hover:text-[#EF4444] transition-colors">
+                  <button
+                    className="p-2 rounded-lg border border-(--border) hover:bg-(--bg-body) text-(--text-secondary) hover:text-[#EF4444] transition-colors cursor-pointer"
+                    title="Supprimer"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

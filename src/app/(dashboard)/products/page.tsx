@@ -236,14 +236,14 @@ export default function Products() {
               onClick={() =>
                 exportProductsToCSV(filteredProducts, "inventaire")
               }
-              className="p-2 hover:bg-white/5 rounded-lg border border-(--border) text-(--text-secondary) hover:text-(--primary) transition-colors"
+              className="p-2 hover:bg-white/5 rounded-lg border border-(--border) text-(--text-secondary) hover:text-(--primary) transition-colors cursor-pointer"
               title="Exporter CSV"
             >
               <ArrowDownToLine size={20} />
             </button>
             <button
               onClick={() => window.print()}
-              className="p-2 hover:bg-white/5 rounded-lg border border-(--border) text-(--text-secondary) hover:text-(--primary) transition-colors"
+              className="p-2 hover:bg-white/5 rounded-lg border border-(--border) text-(--text-secondary) hover:text-(--primary) transition-colors cursor-pointer"
               title="Imprimer"
             >
               <Printer size={20} />
@@ -331,7 +331,7 @@ export default function Products() {
                       <div className="flex items-center justify-end gap-2">
                         <Link href={`/products/${product.id}`}>
                           <button
-                            className="p-2 rounded-lg border border-(--border) hover:border-(--primary) hover:text-(--primary) transition-all"
+                            className="p-2 rounded-lg border border-(--border) hover:border-(--primary) hover:text-(--primary) transition-all cursor-pointer"
                             title="Détails"
                           >
                             <Eye size={16} />
@@ -339,7 +339,7 @@ export default function Products() {
                         </Link>
                         <Link href={`/products/${product.id}/edit`}>
                           <button
-                            className="p-2 rounded-lg border border-(--border) hover:border-(--primary) hover:text-(--primary) transition-all"
+                            className="p-2 rounded-lg border border-(--border) hover:border-(--primary) hover:text-(--primary) transition-all cursor-pointer"
                             title="Modifier"
                           >
                             <Edit3 size={16} />

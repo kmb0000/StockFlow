@@ -31,6 +31,8 @@ import {
 import { Category } from "@/lib/categories/categories.types";
 import Button from "@/components/ui/button"; // Import du bouton standardisé
 import { cn } from "@/utils/cn";
+import { exportDashboardToCSV } from "@/utils/export-csv";
+import Link from "next/link";
 
 export default function Dashboard() {
   const [products, setProducts] = useState<ProductWithRelations[]>([]);
@@ -127,7 +129,11 @@ export default function Dashboard() {
         </div>
         {/* On prévoit l'emplacement pour un bouton, même s'il est optionnel ici */}
         <div className="flex items-center gap-3">
-          <Button variant="secondary" className="hidden sm:flex">
+          <Button
+            variant="secondary"
+            className="hidden sm:flex"
+            onClick={() => exportDashboardToCSV(products)}
+          >
             Exporter
           </Button>
         </div>
@@ -244,9 +250,11 @@ export default function Dashboard() {
       <section className="bg-(--bg-card) border border-(--border) rounded-2xl overflow-hidden shadow-sm">
         <div className="flex justify-between items-center p-5 border-b border-(--border)">
           <h2 className="text-lg font-bold">Derniers mouvements</h2>
-          <button className="text-sm font-semibold text-(--primary) hover:underline flex items-center gap-1">
-            Voir tout <ArrowRight size={14} />
-          </button>
+          <Link href="/movements">
+            <button className="text-sm font-semibold text-(--primary) hover:underline flex items-center gap-1 cursor-pointer">
+              Voir tout <ArrowRight size={14} />
+            </button>
+          </Link>
         </div>
 
         <div className="divide-y divide-(--border)">
