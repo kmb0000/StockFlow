@@ -6,24 +6,27 @@ import {
   login as loginService,
   logout as logoutService,
 } from "@/services/auth.service";
+import { update } from "@/services/users.service";
 import { createContext, useEffect, useState } from "react";
-
-//Type de ce que le context contient
 
 type AuthContextType = {
   user: UserSafe | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateCurrentUser: (data: {
+    name?: string;
+    email?: string;
+    password?: string;
+  }) => Promise<void>;
 };
-
-//Création du context en dehors du composant
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   login: async () => {},
   logout: async () => {},
+  updateCurrentUser: async () => {},
 });
 
 export default function AuthProvider({
@@ -47,7 +50,6 @@ export default function AuthProvider({
     fetchUser();
   }, []);
 
-  //function Login
   async function handleLogin(email: string, password: string) {
     const data = await loginService(email, password);
     setUser(data);
@@ -57,9 +59,34 @@ export default function AuthProvider({
     await logoutService();
     setUser(null);
   }
+
+  async function handleUpdateCurrentUser(data: {
+    name?: string;
+    email?: string;
+    password?: string;
+  }) {
+    if (!user) return;
+    const updated = await update(user.id, data);
+    // Met à jour le context — la sidebar et partout ailleurs se re-rendent
+    setUser({
+      id: updated.id,
+      email: updated.email,
+      name: updated.name,
+      role: updated.role,
+      avatar_url: updated.avatar_url,
+      is_active: updated.is_active,
+    });
+  }
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, login: handleLogin, logout: handleLogout }}
+      value={{
+        user,
+        loading,
+        login: handleLogin,
+        logout: handleLogout,
+        updateCurrentUser: handleUpdateCurrentUser,
+      }}
     >
       {children}
     </AuthContext.Provider>
