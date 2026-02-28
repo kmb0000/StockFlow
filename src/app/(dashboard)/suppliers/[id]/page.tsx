@@ -414,7 +414,7 @@ function ContactItem({
 }: {
   icon: React.ReactNode;
   label: string;
-  value?: string;
+  value?: string | null;
   isLink?: boolean;
 }) {
   if (!value) return null;
