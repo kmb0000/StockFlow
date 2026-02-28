@@ -31,6 +31,14 @@ export interface InsertStockMovementData {
   status: MovementStatus;
 }
 
+export interface StockMovementWithRelations extends StockMovement {
+  product_name: string;
+  product_sku: string;
+  product_category_icon: string | null;
+  created_by_name: string;
+  product_category_color: string | null;
+}
+
 export const createStockMovementSchema = z.object({
   product_id: z.uuid(),
   type: z.enum(["IN", "OUT"]),

@@ -20,28 +20,12 @@ export async function createProduct(data: unknown, context: ActivityContext) {
   try {
     const parsedData = createProductSchema.parse(data);
 
-    const {
-      name,
-      description,
-      quantity,
-      selling_price,
-      purchase_price,
-      category_id,
-      supplier_id,
-    } = parsedData;
-
     const sku = `PROD-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
 
     try {
       const product = await productsRepository.createProduct({
         sku,
-        name,
-        description,
-        quantity,
-        selling_price,
-        purchase_price,
-        category_id,
-        supplier_id,
+        ...parsedData,
       });
 
       // Log uniquement après succès
@@ -93,6 +77,26 @@ export async function getProductById(id: string) {
     const parsedId = z.uuid("ID invalide").parse(id);
 
     const product = await productsRepository.findProductById(parsedId);
+
+    if (!product) {
+      throw new NotFoundError("Produit non trouvé");
+    }
+
+    return product;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new ValidationError("ID invalide");
+    }
+
+    throw error;
+  }
+}
+
+export async function getProductDetailById(id: string) {
+  try {
+    const parsedId = z.uuid("ID invalide").parse(id);
+
+    const product = await productsRepository.findProductDetailById(parsedId);
 
     if (!product) {
       throw new NotFoundError("Produit non trouvé");

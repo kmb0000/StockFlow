@@ -1,6 +1,7 @@
 import {
   CreateProductInput,
   Product,
+  ProductDetail,
   ProductWithRelations,
   UpdateProductInput,
 } from "@/lib/products/products.types";
@@ -12,8 +13,8 @@ export async function getAll(): Promise<ProductWithRelations[]> {
   });
 }
 
-export async function getById(id: string): Promise<ProductWithRelations> {
-  return request<ProductWithRelations>(`/api/products/${id}`, {
+export async function getById(id: string): Promise<ProductDetail> {
+  return request<ProductDetail>(`/api/products/${id}`, {
     method: "GET",
   });
 }

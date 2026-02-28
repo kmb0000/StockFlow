@@ -12,10 +12,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
+// On définit les types de status autorisés
+type ProductStatus = "active" | "draft" | "archived";
+
 export default function AddProduct() {
   const router = useRouter();
 
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
     [],
   );
@@ -29,13 +33,17 @@ export default function AddProduct() {
         const [cats, supps] = await Promise.all([getAll(), getAllSuppliers()]);
         setCategories(cats);
         setSuppliers(supps);
-      } catch {
-        // silencieux
+      } catch (err) {
+        console.error(
+          `[AddProduct] Erreur fetch getAll[categories] getAllSuppliers :`,
+          err,
+        );
       }
     }
     fetchData();
   }, []);
 
+  // Correction ici : on type le state pour que status soit reconnu comme ProductStatus
   const [form, setForm] = useState({
     name: "",
     sku: "",
@@ -51,17 +59,19 @@ export default function AddProduct() {
     supplier_id: "",
     location: "",
     tags: "",
-    status: "active",
+    status: "active" as ProductStatus, // On force le type ici
     is_available: true,
   });
 
-  //function
+  // Mise à jour de la fonction pour accepter le type ProductStatus
   function updateForm(field: string, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
 
     try {
       await create({
@@ -69,12 +79,18 @@ export default function AddProduct() {
         sku: form.sku,
         barcode: form.barcode,
         description: form.description,
-        purchase_price: Number(form.purchase_price),
-        selling_price: Number(form.selling_price),
-        quantity: Number(form.quantity),
-        alert_threshold: Number(form.alert_threshold),
+        purchase_price:
+          form.purchase_price !== "" ? Number(form.purchase_price) : 0,
+        selling_price:
+          form.selling_price !== "" ? Number(form.selling_price) : 0,
+        quantity: form.quantity !== "" ? Number(form.quantity) : 0,
+        // Si vide, undefined pour laisser la BDD mettre le seuil par défaut (ex: 10)
+        alert_threshold:
+          form.alert_threshold !== ""
+            ? Number(form.alert_threshold)
+            : undefined,
+        weight: form.weight !== "" ? Number(form.weight) : undefined,
         unit: form.unit,
-        weight: Number(form.weight),
         category_id: form.category_id,
         supplier_id: form.supplier_id,
         location: form.location,
@@ -82,18 +98,25 @@ export default function AddProduct() {
           .split(",")
           .map((t) => t.trim())
           .filter(Boolean),
-        status: form.status,
+        status: form.status, // Maintenant TS est content car form.status est "ProductStatus"
         is_available: form.is_available,
       });
       router.push("/products");
-    } catch (error) {
-      setError("Erreur lors de la création du produit");
+    } catch (err) {
+      console.error(
+        `[AddProduct] Erreur création produit (SKU: ${form.sku}) :`,
+        err,
+      );
+      setError(
+        "Erreur lors de la création du produit. Vérifiez les champs obligatoires et le SKU.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
-    <div>
-      {/* HEADER */}
+    <div className="p-4 sm:p-1 lg:p-2 space-y-8">
       <header className="flex flex-col gap-4 mb-5">
         <nav className="flex gap-2 opacity-50 text-sm">
           <Link href="/dashboard" className="hover:text-(--primary)">
@@ -113,8 +136,7 @@ export default function AddProduct() {
       </header>
 
       <form className="mt-10" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 bg-(--card)">
-          {/* LEFT COLUMN */}
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
           <div className="space-y-6">
             <div className="bg-(--bg-card) border border-(--border) rounded-xl p-6">
               <h3 className="border-b border-(--border) pb-3 mb-5 text-lg font-bold">
@@ -127,6 +149,7 @@ export default function AddProduct() {
                     placeholder="Ex: Laptop Dell XPS 15"
                     value={form.name}
                     onChange={(e) => updateForm("name", e.target.value)}
+                    required
                   />
                 </div>
 
@@ -135,12 +158,14 @@ export default function AddProduct() {
                   placeholder="SKU-2024-XXX"
                   value={form.sku}
                   onChange={(e) => updateForm("sku", e.target.value)}
+                  required
                 />
                 <Input
                   label={"Code-barres *"}
                   placeholder="123456789012"
                   value={form.barcode}
                   onChange={(e) => updateForm("barcode", e.target.value)}
+                  required
                 />
 
                 <div className="col-span-2">
@@ -154,7 +179,6 @@ export default function AddProduct() {
               </div>
             </div>
 
-            {/* SECTION PRIX ET STOCK */}
             <div className="bg-(--bg-card) border border-(--border) rounded-xl p-6">
               <h3 className="border-b border-(--border) pb-3 mb-5 text-lg font-bold">
                 Prix et stock
@@ -162,22 +186,32 @@ export default function AddProduct() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Input
                   label={"Prix d'achat (€) *"}
+                  type="number"
+                  step="0.01"
                   value={form.purchase_price}
                   onChange={(e) => updateForm("purchase_price", e.target.value)}
+                  required
                 />
                 <Input
                   label={"Prix de vente (€) *"}
+                  type="number"
+                  step="0.01"
                   value={form.selling_price}
                   onChange={(e) => updateForm("selling_price", e.target.value)}
+                  required
                 />
 
                 <Input
                   label={"Quantité initiale *"}
+                  type="number"
                   value={form.quantity}
                   onChange={(e) => updateForm("quantity", e.target.value)}
+                  required
                 />
                 <Input
                   label={"Seuil alerte stock"}
+                  type="number"
+                  placeholder="Défaut: 10"
                   value={form.alert_threshold}
                   onChange={(e) =>
                     updateForm("alert_threshold", e.target.value)
@@ -188,6 +222,7 @@ export default function AddProduct() {
                   label={"Unité *"}
                   value={form.unit}
                   onChange={(e) => updateForm("unit", e.target.value)}
+                  required
                 >
                   <option value="">Sélectionner...</option>
                   <option>Pièce</option>
@@ -198,13 +233,14 @@ export default function AddProduct() {
                 </Select>
                 <Input
                   label={"Poids (kg)"}
+                  type="number"
+                  step="0.1"
                   value={form.weight}
                   onChange={(e) => updateForm("weight", e.target.value)}
                 />
               </div>
             </div>
 
-            {/* SECTION ORGANISATION */}
             <div className="bg-(--bg-card) border border-(--border) rounded-xl p-6">
               <h3 className="border-b border-(--border) pb-3 mb-5 text-lg font-bold">
                 Organisation
@@ -214,6 +250,7 @@ export default function AddProduct() {
                   label="Catégorie *"
                   value={form.category_id}
                   onChange={(e) => updateForm("category_id", e.target.value)}
+                  required
                 >
                   <option value="">Sélectionner...</option>
                   {categories.map((cat) => (
@@ -227,6 +264,7 @@ export default function AddProduct() {
                   label="Fournisseur *"
                   value={form.supplier_id}
                   onChange={(e) => updateForm("supplier_id", e.target.value)}
+                  required
                 >
                   <option value="">Sélectionner...</option>
                   {suppliers.map((sup) => (
@@ -261,9 +299,8 @@ export default function AddProduct() {
             </div>
           </div>
 
-          {/* RIGHT COLUMN */}
           <div className="space-y-6">
-            <div className="bg-(--card) border border-(--border) rounded-xl p-6 flex flex-col gap-2">
+            <div className="bg-(--bg-card) border border-(--border) rounded-xl p-6 flex flex-col gap-2">
               <h3 className="border-b border-(--border) pb-3 mb-5 text-lg font-bold">
                 Image du produit
               </h3>
@@ -271,7 +308,7 @@ export default function AddProduct() {
                 <div className="mb-3">
                   <Camera className="w-20 h-20" color="blue" />
                 </div>
-                <div className="flex flex-col justify-center items-center">
+                <div className="flex flex-col justify-center items-center text-center">
                   <span className="text-(--text-primary)">
                     <strong className="text-(--primary)">
                       Cliquez pour uploader
@@ -286,13 +323,11 @@ export default function AddProduct() {
               </div>
             </div>
 
-            {/* SECTION CONSEILS */}
             <div className="bg-[rgba(0,102,255,0.05)] border border-[rgba(0,102,255,0.2)] rounded-xl p-5">
               <div className="flex items-center gap-2 text-sm font-semibold text-(--primary) mb-4">
                 <Lightbulb className="w-4 h-4" color="yellow" />
                 Conseils
               </div>
-
               <ul className="text-sm text-(--text-secondary) space-y-3">
                 <li className="flex items-start gap-2">
                   <span className="text-(--primary)">•</span>
@@ -300,42 +335,26 @@ export default function AddProduct() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-(--primary)">•</span>
-                  Remplissez tous les champs obligatoires
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-(--primary)">•</span>
                   Le SKU doit être unique
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-(--primary)">•</span>
-                  Définissez un seuil d&apos;alerte adapté
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-(--primary)">•</span>
-                  Vérifiez le prix avant validation
                 </li>
               </ul>
             </div>
-
-            {/* SECTION STATUT */}
 
             <div className="bg-(--bg-card) border border-(--border) rounded-xl p-6">
               <h3 className="border-b border-(--border) pb-3 mb-5 text-lg font-bold">
                 Statut
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className="col-span-2">
-                  <Select
-                    label={"Statut du produit"}
-                    value={form.status}
-                    onChange={(e) => updateForm("status", e.target.value)}
-                  >
-                    <option value="active">Actif</option>
-                    <option value="draft">Brouillon</option>
-                    <option value="archived">Archivé</option>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-3 mt-2">
+              <div className="grid grid-cols-1 gap-5">
+                <Select
+                  label={"Statut du produit"}
+                  value={form.status}
+                  onChange={(e) => updateForm("status", e.target.value)}
+                >
+                  <option value="active">Actif</option>
+                  <option value="draft">Brouillon</option>
+                  <option value="archived">Archivé</option>
+                </Select>
+                <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="available"
@@ -354,13 +373,18 @@ export default function AddProduct() {
           </div>
         </div>
 
-        {/* footer BOUTONS */}
-        {error && <p className="text-[#EF4444] text-sm mt-4">{error}</p>}
-        <div className="flex justify-end gap-4 mt-8">
+        {error && (
+          <p className="text-[#EF4444] text-sm mt-4 font-medium">{error}</p>
+        )}
+        <div className="flex justify-end gap-4 mt-8 pb-10">
           <Link href="/products">
-            <Button variant="secondary">Annuler</Button>
+            <Button variant="secondary" type="button">
+              Annuler
+            </Button>
           </Link>
-          <Button type="submit">Créer le produit</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Création..." : "Créer le produit"}
+          </Button>
         </div>
       </form>
     </div>

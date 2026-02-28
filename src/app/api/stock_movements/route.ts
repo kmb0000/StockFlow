@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     await requireAuth();
-    const movements = await stockMovement.getAllStockMovements();
+    const movements = await stockMovement.getAllStockMovementsWithRelations();
 
     return NextResponse.json({
       success: true,

@@ -12,3 +12,12 @@ export function getStockStatus(quantity: number): {
   if (quantity <= 20) return { label: "Stock bas", variant: "warning" };
   return { label: "En stock", variant: "success" };
 }
+
+export function getProductStatus(status: string): {
+  label: string;
+  variant: "success" | "warning" | "neutral";
+} {
+  if (status === "active") return { label: "Actif", variant: "success" };
+  if (status === "draft") return { label: "Brouillon", variant: "warning" };
+  return { label: "Archivé", variant: "neutral" };
+}

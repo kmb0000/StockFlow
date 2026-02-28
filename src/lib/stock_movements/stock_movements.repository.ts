@@ -3,6 +3,7 @@ import { db, pool } from "../db/connection";
 import {
   InsertStockMovementData,
   StockMovement,
+  StockMovementWithRelations,
 } from "./stock_movements.types";
 
 export async function create(
@@ -204,4 +205,48 @@ export async function markRejected(
     created_at: new Date(row.created_at),
     validated_at: row.validated_at ? new Date(row.validated_at) : null,
   };
+}
+
+export async function findAllWithRelations(): Promise<
+  StockMovementWithRelations[]
+> {
+  // Requête simple, pas besoin de transaction
+  const { rows } = await db.query<StockMovementWithRelations>(
+    `
+    SELECT
+  sm.id,
+  sm.type,
+  sm.quantity,
+  sm.reason,
+  sm.notes,
+  sm.reference,
+  sm.unit_price,
+  sm.status,
+  sm.created_at,
+  sm.validated_at,
+  sm.validated_by,
+  sm.product_id,
+  sm.created_by,
+
+  p.name AS product_name,
+  p.sku  AS product_sku,
+  c.icon AS product_category_icon,
+  c.color AS product_category_color,
+
+  u.name AS created_by_name
+
+FROM stock_movements sm
+LEFT JOIN products   p ON sm.product_id = p.id
+LEFT JOIN categories c ON p.category_id = c.id
+LEFT JOIN users      u ON sm.created_by = u.id
+ORDER BY sm.created_at DESC
+    `,
+  );
+
+  // Transformation des dates (PostgreSQL → string → Date)
+  return rows.map((row) => ({
+    ...row,
+    created_at: new Date(row.created_at),
+    validated_at: row.validated_at ? new Date(row.validated_at) : null,
+  }));
 }

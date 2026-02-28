@@ -1,28 +1,21 @@
 import { z } from "zod";
 
-// Sert à valider le body du POST /api/products et représente ce que le client est autorisé à envoyer
 export const createProductSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3, "Le nom du produit doit contenir au moins 3 caractères"),
-  description: z
-    .string()
-    .trim()
-    .max(1000, "La description ne peut pas dépasser 1000 caractères")
-    .optional(),
-  quantity: z.coerce
-    .number()
-    .int("La quantité doit être un entier")
-    .min(0, "La quantité doit être supérieure ou égale à 0"),
-  selling_price: z.coerce
-    .number()
-    .min(0, "Le prix de vente doit être supérieur ou égal à 0"),
-  purchase_price: z.coerce
-    .number()
-    .min(0, "Le prix d'achat doit être supérieur ou égal à 0"),
+  name: z.string().trim().min(3, "Le nom doit contenir au moins 3 caractères"),
+  description: z.string().trim().max(1000).optional(),
+  quantity: z.coerce.number().int().min(0),
+  selling_price: z.coerce.number().min(0),
+  purchase_price: z.coerce.number().min(0),
   category_id: z.string().optional().nullable(),
   supplier_id: z.string().optional().nullable(),
+  barcode: z.string().optional().nullable(),
+  unit: z.string().optional(),
+  weight: z.coerce.number().optional().nullable(),
+  alert_threshold: z.coerce.number().int().min(0).optional().nullable(),
+  location: z.string().optional().nullable(),
+  tags: z.array(z.string()).optional().nullable(),
+  status: z.enum(["active", "draft", "archived"]).optional(),
+  is_available: z.boolean().optional(),
 });
 //Génère automatiquement le type TS basé sur le schema
 export type CreateProductInput = z.infer<typeof createProductSchema>;
@@ -103,4 +96,19 @@ export interface ProductWithRelations {
   created_by_id: string | null;
   created_by_name: string | null;
   created_by_role: string | null;
+}
+
+export interface ProductDetail extends ProductWithRelations {
+  barcode: string | null;
+  tax_rate: string;
+  unit: string;
+  alert_threshold: number | null;
+  weight: string | null;
+  location: string | null;
+  tags: string[] | null;
+  images: string[] | null;
+  is_available: boolean;
+  supplier_email: string | null;
+  supplier_phone: string | null;
+  supplier_contact: string | null;
 }

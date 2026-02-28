@@ -153,6 +153,10 @@ export async function getAllStockMovements() {
   return stockMovementRepository.findAll();
 }
 
+export async function getAllStockMovementsWithRelations() {
+  return stockMovementRepository.findAllWithRelations();
+}
+
 export async function getStockMovementById(id: string) {
   const movement = await stockMovementRepository.getById(id);
 

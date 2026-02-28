@@ -1,19 +1,16 @@
 import { cn } from "@/utils/cn";
 
-//Ajoute la nouvelle valeur de l'objet pour TS
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  children?: React.ReactNode;
   variant?: "primary" | "secondary" | "danger";
 };
-//objet qui contient le style réel
-const variants = {
-  primary: "bg-[#0066FF] text-white hover:bg-[#0052CC]",
-  secondary: "border border-[#1F2937] text-[#9CA3AF]",
-  danger: "bg-[#EF4444] text-white",
-};
 
-const baseClasses =
-  "inline-flex items-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm cursor-pointer transition-all duration-200";
+const variants = {
+  primary:
+    "bg-(--primary) text-white hover:opacity-90 shadow-sm shadow-blue-500/20",
+  secondary:
+    "border border-(--border) text-(--text-secondary) hover:bg-white/5 hover:text-(--text-primary)",
+  danger: "bg-red-500 text-white hover:bg-red-600 shadow-sm shadow-red-500/20",
+};
 
 export default function Button({
   children,
@@ -23,7 +20,11 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
-      className={cn(baseClasses, variants[variant], className)}
+      className={cn(
+        "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none",
+        variants[variant],
+        className,
+      )}
       {...props}
     >
       {children}

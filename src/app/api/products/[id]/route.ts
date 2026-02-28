@@ -12,7 +12,7 @@ export async function GET(
     await requireAuth();
     const { id } = await params;
 
-    const product = await productsService.getProductById(id);
+    const product = await productsService.getProductDetailById(id);
 
     return NextResponse.json({
       success: true,
