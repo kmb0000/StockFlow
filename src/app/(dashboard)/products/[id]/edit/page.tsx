@@ -99,6 +99,7 @@ export default function EditProduct({
           is_available: !!product.is_available,
         });
       } catch (err) {
+        console.error(`[EditProduct] Erreur fetch :`, err);
         setError("Erreur de chargement.");
       }
     }
@@ -128,6 +129,7 @@ export default function EditProduct({
       });
       router.push("/products");
     } catch (err) {
+      console.error(`[EditProduct] Erreur update :`, err);
       setError("Erreur lors de la modification.");
     }
   }

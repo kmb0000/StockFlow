@@ -50,6 +50,9 @@ export default function SupplierDetail({
         ]);
 
         if (!sup) {
+          console.warn(
+            `[SupplierDetail] Tentative d'accès à un ID inexistant : ${id}`,
+          );
           setError("Fournisseur introuvable.");
           return;
         }
@@ -58,6 +61,7 @@ export default function SupplierDetail({
         // Filtrage des produits liés à ce fournisseur
         setProducts(allProducts.filter((p) => p.supplier_id === id));
       } catch (err) {
+        console.error(`[SupplierDetail] Erreur fetch ID ${id}:`, err);
         setError("Une erreur est survenue lors du chargement des données.");
       } finally {
         setLoading(false);
@@ -97,6 +101,7 @@ export default function SupplierDetail({
       await deleteSupplier(id);
       router.push("/suppliers");
     } catch (err) {
+      console.error(`[SupplierDetail] Erreur delete ID ${id}:`, err);
       alert(
         "Erreur : Impossible de supprimer ce fournisseur (il est probablement lié à des produits existants).",
       );

@@ -7,7 +7,6 @@ import { getAll } from "@/services/categories.service";
 import { getAll as getAllProducts } from "@/services/products.service";
 import {
   CircleFadingPlus,
-  Eye,
   Pencil,
   Trash2,
   LayoutGrid,
@@ -33,6 +32,7 @@ export default function Categories() {
         setCategories(categoriesData);
         setProducts(productsData);
       } catch (err) {
+        console.error(`[Categories] Erreur fetch :`, err);
         setError("Erreur lors de la récupération des données");
       } finally {
         setLoading(false);

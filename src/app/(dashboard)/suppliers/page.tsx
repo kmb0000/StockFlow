@@ -42,7 +42,11 @@ export default function Suppliers() {
         ]);
         setSuppliers(suppliersData);
         setProducts(productsData);
-      } catch {
+      } catch (err) {
+        console.error(
+          `[Suppliers] Erreur fetch getAll[suppliers] ou getAllProducts :`,
+          err,
+        );
         setError("Erreur lors de la récupération des données");
       } finally {
         setLoading(false);

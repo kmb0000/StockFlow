@@ -33,8 +33,11 @@ export default function AddProduct() {
         const [cats, supps] = await Promise.all([getAll(), getAllSuppliers()]);
         setCategories(cats);
         setSuppliers(supps);
-      } catch {
-        // silencieux
+      } catch (err) {
+        console.error(
+          `[AddProduct] Erreur fetch getAll[categories] getAllSuppliers :`,
+          err,
+        );
       }
     }
     fetchData();
@@ -100,6 +103,10 @@ export default function AddProduct() {
       });
       router.push("/products");
     } catch (err) {
+      console.error(
+        `[AddProduct] Erreur création produit (SKU: ${form.sku}) :`,
+        err,
+      );
       setError(
         "Erreur lors de la création du produit. Vérifiez les champs obligatoires et le SKU.",
       );

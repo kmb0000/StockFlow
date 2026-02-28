@@ -62,6 +62,7 @@ export default function Dashboard() {
         setMovements(movData);
         setCategories(catData);
       } catch (err) {
+        console.error(`[Dashboard] Erreur fetch :`, err);
         setError("Erreur lors du chargement des données");
       } finally {
         setLoading(false);
@@ -113,7 +114,7 @@ export default function Dashboard() {
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
-    <div className="flex flex-col gap-8 p-4 lg:p-8 max-w-[1600px] mx-auto">
+    <div className="flex flex-col gap-8 p-4 lg:p-8 max-w-400 mx-auto">
       {/* ================= HEADER STANDARD ================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -175,7 +176,7 @@ export default function Dashboard() {
             <div className="w-1 h-4 bg-(--primary) rounded-full" />
             Flux de stock (7 jours)
           </h3>
-          <div className="h-[300px] w-full">
+          <div className="h-75 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
@@ -223,7 +224,7 @@ export default function Dashboard() {
             <div className="w-1 h-4 bg-purple-500 rounded-full" />
             Catégories
           </h3>
-          <div className="h-[300px] w-full">
+          <div className="h-75 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -260,7 +261,7 @@ export default function Dashboard() {
           {recentMovements.map((movement) => (
             <div
               key={movement.id}
-              className="flex items-center gap-4 p-4 hover:bg-white/[0.02] transition-colors group"
+              className="flex items-center gap-4 p-4 hover:bg-white/2 transition-colors group"
             >
               <div
                 className={cn(

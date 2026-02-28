@@ -67,6 +67,7 @@ export default function AddSupplier() {
 
       router.push("/suppliers");
     } catch (err) {
+      console.error(`[AddSupplier] Failed to create supplier`, err);
       setError("Une erreur est survenue lors de la création.");
     } finally {
       setIsSubmitting(false);

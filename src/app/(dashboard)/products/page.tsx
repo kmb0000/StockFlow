@@ -72,7 +72,8 @@ export default function Products() {
       try {
         const data = await getAll();
         setProducts(data);
-      } catch {
+      } catch (err) {
+        console.error(`[Products] Erreur fetch getAll :`, err);
         setError("Une erreur est survenue pendant le chargement des produits");
       } finally {
         setLoading(false);
@@ -90,7 +91,7 @@ export default function Products() {
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
-    <div className="flex flex-col gap-6 p-4 lg:p-8 max-w-[1600px] mx-auto">
+    <div className="flex flex-col gap-6 p-4 lg:p-8 max-w-400 mx-auto">
       {/* ================= HEADER ================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -253,7 +254,7 @@ export default function Products() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-white/[0.02] text-left border-b border-(--border)">
+              <tr className="bg-white/2 text-left border-b border-(--border)">
                 <th className="px-6 py-4 text-xs font-bold text-(--text-secondary) uppercase tracking-wider">
                   Produit
                 </th>
@@ -280,7 +281,7 @@ export default function Products() {
                 return (
                   <tr
                     key={product.id}
-                    className="hover:bg-white/[0.01] transition-colors group"
+                    className="hover:bg-white/1 transition-colors group"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">

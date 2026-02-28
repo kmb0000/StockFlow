@@ -49,6 +49,7 @@ export default function DetailsProduct({ params }: ProductDetailPageProps) {
         setProduct(productData);
         setMovements(movementsData);
       } catch (err) {
+        console.error(`[DetailsProduct] Erreur fetch getById et getAll :`, err);
         setError("Erreur lors de la récupération des données");
       } finally {
         setLoading(false);
@@ -65,6 +66,7 @@ export default function DetailsProduct({ params }: ProductDetailPageProps) {
       await deleteProduct(id);
       router.push("/products");
     } catch (err) {
+      console.error(`[DetailsProduct] Erreur delete :`, err);
       alert("Erreur lors de la suppression");
       setIsDeleting(false);
     }
@@ -95,6 +97,7 @@ export default function DetailsProduct({ params }: ProductDetailPageProps) {
       setProduct(updatedProduct);
       setMovements(updatedMovements);
     } catch (err) {
+      console.error(`[DetailsProduct] Erreur enregistrement mouvements :`, err);
       alert("Erreur lors de l'enregistrement du mouvement");
     } finally {
       setIsSubmittingMovement(false);

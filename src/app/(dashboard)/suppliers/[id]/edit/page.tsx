@@ -43,7 +43,7 @@ export default function EditSupplier({
         setLoading(true);
         const s = await getById(id);
 
-        // On s'assure qu'aucune valeur n'est 'null' pour les inputs React
+        // On s'assure qu'aucune valeur n'est 'null' pour les inputs
         setForm({
           name: s.name || "",
           email: s.email ?? "",
@@ -58,6 +58,7 @@ export default function EditSupplier({
           is_active: s.is_active ?? true,
         });
       } catch (err) {
+        console.error(`[EditSupplier] Erreur Fetch ID ${id} :`, err);
         setError("Impossible de charger les données du fournisseur.");
       } finally {
         setLoading(false);
@@ -100,6 +101,10 @@ export default function EditSupplier({
       router.push(`/suppliers/${id}`); // On redirige vers le détail pour voir le résultat
       router.refresh();
     } catch (err) {
+      console.error(
+        `[EditSupplier] Erreur lors de la mise à jour ID ${id} :`,
+        err,
+      );
       setError("Une erreur est survenue lors de l'enregistrement.");
       setIsSubmitting(false);
     }

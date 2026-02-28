@@ -56,6 +56,7 @@ export default function StockMovements() {
       const data = await getAll();
       setMovements(data);
     } catch (err) {
+      console.error(`[StockMovements] Erreur fetch getAll :`, err);
       setError("Erreur lors de la récupération des mouvements");
     } finally {
       setLoading(false);
@@ -84,6 +85,7 @@ export default function StockMovements() {
       else await reject(id);
       fetchMovements();
     } catch (err) {
+      console.error(`[StockMovements] Erreur pendant l'action :`, err);
       alert("L'action a échoué.");
     }
   };

@@ -45,6 +45,7 @@ export default function CategoryDetail({
         setCategory(cat);
         setProducts(allProducts);
       } catch (err) {
+        console.error(`[CategoryDetail] Erreur fetch :`, err);
         setError("Erreur lors du chargement de la catégorie");
       } finally {
         setLoading(false);
@@ -91,6 +92,7 @@ export default function CategoryDetail({
         await deleteCategorie(id);
         router.push("/categories");
       } catch (err) {
+        console.error(`[CategoryDetail] Erreur delete :`, err);
         alert("Erreur lors de la suppression");
       }
     }
@@ -231,7 +233,7 @@ export default function CategoryDetail({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[800px]">
+            <table className="w-full border-collapse min-w-200">
               <thead>
                 <tr className="text-(--text-secondary) text-xs uppercase tracking-widest bg-(--bg-body)/50">
                   <th className="px-6 py-4 text-left font-bold">Produit</th>

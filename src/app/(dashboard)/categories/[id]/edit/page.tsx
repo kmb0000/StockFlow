@@ -69,6 +69,7 @@ export default function EditCategory({
           icon: category.icon ?? "📦",
         });
       } catch (err) {
+        console.error(`[EditCategory] Erreur fetch :`, err);
         setError("Impossible de récupérer les données de la catégorie.");
       } finally {
         setLoading(false);
@@ -99,6 +100,7 @@ export default function EditCategory({
       router.push("/categories");
       router.refresh(); // Pour forcer la mise à jour des données côté serveur
     } catch (err) {
+      console.error(`[EditCategory] Erreur update :`, err);
       setError("Erreur lors de la mise à jour. Veuillez réessayer.");
       setIsSubmitting(false);
     }

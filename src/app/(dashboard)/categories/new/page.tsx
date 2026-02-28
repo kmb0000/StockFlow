@@ -72,6 +72,7 @@ export default function AddCategory() {
       });
       router.push("/categories");
     } catch (err) {
+      console.error(`[AddCategory] Erreur create :`, err);
       setError("Erreur lors de la création de la catégorie");
       setIsSubmitting(false);
     }
