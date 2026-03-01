@@ -233,15 +233,6 @@ export default function StockMovements() {
     }
   }
 
-  async function fetchMovements() {
-    try {
-      const data = await getAll();
-      setMovements(data);
-    } catch (err) {
-      console.error(`[StockMovements] Erreur fetch getAll :`, err);
-    }
-  }
-
   // Stats calculées
   const totalMovements = movements.length;
   const entriesCount = movements.filter((m) => m.type === "IN").length;
@@ -273,8 +264,17 @@ export default function StockMovements() {
       setFormLoading(true);
       setFormError("");
       await create({ ...data, type });
-      await fetchMovements();
-      type === "IN" ? setModalIn(false) : setModalOut(false);
+      const [movementsData, productsData] = await Promise.all([
+        getAll(),
+        getAllProducts(),
+      ]);
+      setMovements(movementsData);
+      setProducts(productsData);
+      if (type === "IN") {
+        setModalIn(false);
+      } else {
+        setModalOut(false);
+      }
     } catch (err: unknown) {
       setFormError(
         err instanceof Error ? err.message : "Erreur lors de la création",
@@ -288,7 +288,12 @@ export default function StockMovements() {
     try {
       if (action === "validate") await validate(id);
       else await reject(id);
-      fetchMovements();
+      const [movementsData, productsData] = await Promise.all([
+        getAll(),
+        getAllProducts(),
+      ]);
+      setMovements(movementsData);
+      setProducts(productsData);
     } catch (err) {
       console.error(`[StockMovements] Erreur pendant l'action :`, err);
       alert("L'action a échoué vous ne pouvez pas avoir un stock négatif.");
