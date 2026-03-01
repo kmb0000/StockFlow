@@ -4,7 +4,6 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { ApiError } from "@/services/api-error";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -18,8 +17,20 @@ export default function Login() {
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(""); //Reset à chaque tentative
+    setError("");
 
+    if (!email) {
+      setError("L'adresse email est obligatoire");
+      return;
+    }
+    if (!password) {
+      setError("Le mot de passe est obligatoire");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères");
+      return;
+    }
     try {
       await login(email, password);
       router.replace("/dashboard");
@@ -32,7 +43,7 @@ export default function Login() {
     }
   }
   return (
-    <div className=" flex flex-col w-full max-w-110 mt-5">
+    <div className=" flex flex-col w-full max-w-110">
       <div className="text-center mb-12">
         <h1 className="text-3xl font-black text-(--primary) mb-3">StockFlow</h1>
         <p className="opacity-60">Gestion d&apos;inventaire professionnelle</p>
@@ -64,29 +75,12 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            <div className="flex justify-end text-(--primary)">
-              <Link href="#">Mot de passe oublié ?</Link>
-            </div>
-
-            {error && <p className="text-sm text-[#EF4444]">{error}</p>}
+            {error && (
+              <p className="text-sm text-[#EF4444] text-center">{error}</p>
+            )}
             <Button className="w-full " type="submit">
               Se connecter
             </Button>
-
-            <div className="flex items-center my-6">
-              <div className="flex-1 border-t border-(--border) opacity-60"></div>
-
-              <span className="px-4 text-md opacity-80">ou</span>
-
-              <div className="flex-1 border-t border-(--border) opacity-60"></div>
-            </div>
-
-            <p className="text-center">
-              Pas encore de compte ?{" "}
-              <a className="text-(--primary)" href="#">
-                Créer un compte
-              </a>
-            </p>
           </form>
         </div>
       </div>
