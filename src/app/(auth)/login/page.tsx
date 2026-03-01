@@ -17,8 +17,20 @@ export default function Login() {
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(""); //Reset à chaque tentative
+    setError("");
 
+    if (!email) {
+      setError("L'adresse email est obligatoire");
+      return;
+    }
+    if (!password) {
+      setError("Le mot de passe est obligatoire");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères");
+      return;
+    }
     try {
       await login(email, password);
       router.replace("/dashboard");
