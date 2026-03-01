@@ -28,3 +28,24 @@ export async function insertActivityLog(
     ],
   );
 }
+
+export async function getAllActivityLogs() {
+  const { rows } = await db.query(`
+    SELECT
+      al.id,
+      al.action,
+      al.entity_type,
+      al.entity_id,
+      al.details,
+      al.ip_address,
+      al.created_at,
+      u.name  AS user_name,
+      u.email AS user_email,
+      u.role  AS user_role
+    FROM activity_logs al
+    LEFT JOIN users u ON al.user_id = u.id
+    ORDER BY al.created_at DESC
+    LIMIT 500
+  `);
+  return rows;
+}

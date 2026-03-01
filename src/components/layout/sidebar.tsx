@@ -9,9 +9,10 @@ import {
   Truck,
   ArrowLeftRight,
   Users,
+  Activity,
   Settings,
   LogOut,
-  X, // Juste ajouté pour fermer sur mobile
+  X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/utils/cn";
@@ -127,6 +128,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 href="/users"
                 label="Utilisateurs"
                 Icon={Users}
+                onClick={onClose}
+              />
+              <SidebarItem
+                href="/logs"
+                label="Logs d'activité"
+                Icon={Activity}
                 onClick={onClose}
               />
               <SidebarItem

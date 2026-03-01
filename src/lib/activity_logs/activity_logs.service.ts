@@ -1,4 +1,7 @@
-import { insertActivityLog } from "./activity_logs.repository";
+import {
+  getAllActivityLogs,
+  insertActivityLog,
+} from "./activity_logs.repository";
 import { ActivityAction, EntityType } from "./activity_logs.types";
 import { ActivityContext } from "./activity-context";
 
@@ -26,4 +29,8 @@ export async function logActivity({
     ipAddress: context.ipAddress,
     userAgent: context.userAgent,
   });
+}
+
+export async function getAll() {
+  return await getAllActivityLogs();
 }
